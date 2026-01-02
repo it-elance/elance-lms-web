@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Elance LMS Web
 
-## Getting Started
+A modern Learning Management System built with the latest web technologies, featuring a strict development environment to ensure code quality and consistency.
 
-First, run the development server:
+## 🚀 Tech Stack
+
+- **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
+- **Library:** [React 19](https://react.dev/)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS 4](https://tailwindcss.com/)
+- **Package Manager:** [Yarn](https://yarnpkg.com/) (Strictly Enforced)
+
+## 🛠️ Development Tools & enforce Quality
+
+We rely on strict tooling to maintain high code standards:
+
+- **Linter:** [ESLint](https://eslint.org/) (with strict TypeScript and Next.js rules)
+- **Formatter:** [Prettier](https://prettier.io/)
+- **Git Hooks:** [Husky](https://typicode.github.io/husky/)
+- **Staged Linter:** [lint-staged](https://github.com/lint-staged/lint-staged)
+
+> **Note:** `npm` is explicitly blocked in this project to prevent lockfile conflicts. You must use `yarn`.
+
+## 🏁 Getting Started
+
+### 1. Prerequisites
+
+Ensure you have the following installed:
+
+- [Node.js](https://nodejs.org/) (v20 or later recommended)
+- [Yarn](https://yarnpkg.com/)
+
+### 2. Installation
+
+Install dependencies using Yarn:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+yarn install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+_Note: If you try to run `npm install`, it will fail automatically._
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Running the Development Server
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Start the local development server:
 
-## Learn More
+```bash
+yarn dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Build for Production
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+To create a production build:
 
-## Deploy on Vercel
+```bash
+yarn build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To start the production server:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+yarn start
+```
+
+## 🧹 Linting & Formatting
+
+You can manually run the following commands to check and fix code issues:
+
+| Command         | Description                      |
+| :-------------- | :------------------------------- |
+| `yarn lint`     | Check for linting errors         |
+| `yarn lint:fix` | Fix linting errors automatically |
+| `yarn format`   | Format all files using Prettier  |
+
+## 🔗 Git Hooks
+
+This project uses **Husky** to automatically verify code quality before committing.
+
+- **Pre-commit Hook:** Runs `lint-staged` to ensure that all staged files are properly formatted and linted before they can be committed.
+  - If there are errors, the commit will be blocked until they are resolved.
+  - This ensures that broken or messy code never reaches the repository.
+
+## 📂 Project Structure
+
+```bash
+.
+├── app/                  # Next.js App Router pages and layouts
+├── public/               # Static assets
+├── .husky/               # Git hooks configuration
+├── eslint.config.mjs     # ESLint configuration
+├── next.config.ts        # Next.js configuration
+├── package.json          # Dependencies and scripts
+├── postcss.config.mjs    # PostCSS configuration
+├── tsconfig.json         # TypeScript configuration
+└── yarn.lock             # Yarn lockfile (Source of Truth)
+```
