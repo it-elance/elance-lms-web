@@ -47,7 +47,7 @@ export default defineConfig([
 
       // Code quality
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'eqeqeq': ['error', 'always'],
+      eqeqeq: ['error', 'always'],
     },
   },
 ]);
