@@ -211,7 +211,7 @@ const Header = () => {
       <AnimatePresence>
         {isSearchOpen && (
           <motion.div
-            className="fixed inset-0 bg-white z-[60] flex flex-col p-4 lg:hidden"
+            className="fixed inset-0 bg-white z-60 flex flex-col p-4 lg:hidden"
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
