@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import LayoutWrapper from '@/components/LayoutWrapper';
 
 export const metadata: Metadata = {
   title: 'Elance Learning',
@@ -8,14 +9,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
+const RootLayout = ({ children }: { children: React.ReactNode }) => (
+  <html lang="en">
+    <body>
+      <LayoutWrapper>{children}</LayoutWrapper>
+    </body>
+  </html>
+);
+
+export default RootLayout;

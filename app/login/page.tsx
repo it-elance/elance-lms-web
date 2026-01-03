@@ -5,6 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 type Step = 'SPLASH' | 'MOBILE' | 'EMAIL' | 'OTP';
 
@@ -14,6 +15,8 @@ const Login = () => {
   const [otp, setOtp] = useState(['', '', '', '']);
   const [phoneNumber, setPhoneNumber] = useState('');
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -173,7 +176,7 @@ const Login = () => {
               onClick={handleBack}
               className="mb-3 flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 cursor-pointer"
               whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 1.1 }}
             >
               <ChevronLeft />
             </motion.button>
@@ -378,8 +381,9 @@ const Login = () => {
               <motion.button
                 variants={buttonVariants}
                 whileHover="hover"
-                whileTap="tap"
+                // whileTap="tap"
                 className="w-full Button-Primary rounded-xl bg-(--color-primary-500) py-3 text-(--color-white) cursor-pointer"
+                onClick={() => router.push('/home')}
               >
                 Continue
               </motion.button>
@@ -388,7 +392,7 @@ const Login = () => {
                 <motion.button
                   variants={buttonVariants}
                   whileHover="hover"
-                  whileTap="tap"
+                  // whileTap="tap"
                   onClick={handleLogin}
                   className="w-full Button-Primary rounded-xl bg-(--color-primary-500) py-3 text-(--color-white) cursor-pointer"
                 >
@@ -398,7 +402,7 @@ const Login = () => {
                 <motion.button
                   variants={buttonVariants}
                   whileHover="hover"
-                  whileTap="tap"
+                  // whileTap="tap"
                   onClick={() =>
                     setStep(step === 'MOBILE' ? 'EMAIL' : 'MOBILE')
                   }
