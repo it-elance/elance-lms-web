@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const courses = [
   {
@@ -27,27 +28,42 @@ const Course = () => {
   const [selectedCourse, setSelectedCourse] = useState('acca');
 
   return (
-    <div className="min-h-full bg-(--color-bg-primary) relative flex flex-col">
+    <motion.div
+      className="min-h-full bg-(--color-bg-primary) relative flex flex-col"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none">
-        <button
+        <motion.button
           onClick={() => router.back()}
           className="rounded-full transition-colors pointer-events-auto cursor-pointer"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
         >
           <ChevronLeft className="w-6 h-6 text-(--color-text-primary)" />
-        </button>
+        </motion.button>
       </div>
 
       <div className="flex-1 flex items-center justify-center -mt-20">
         <div className="w-full max-w-xl">
-          <h1 className="Heading-3 text-(--color-text-primary) mb-6">
+          <motion.h1
+            className="Heading-3 text-(--color-text-primary) mb-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
             What do you want to learn today?
-          </h1>
+          </motion.h1>
 
           <div className="space-y-4">
             {courses.map((course) => {
               const isSelected = selectedCourse === course.id;
               return (
-                <div
+                <motion.div
                   key={course.id}
                   onClick={() => setSelectedCourse(course.id)}
                   className={`relative p-4 rounded-xl border cursor-pointer transition-all duration-200 flex items-center justify-between group ${
@@ -74,17 +90,29 @@ const Course = () => {
                         : 'border-(--color-border-strong)'
                     }`}
                   >
-                    {isSelected && (
-                      <div className="w-3 h-3 rounded-full bg-(--color-primary-500)" />
-                    )}
+                    <AnimatePresence>
+                      {isSelected && (
+                        <motion.div
+                          className="w-3 h-3 rounded-full bg-(--color-primary-500)"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          transition={{
+                            type: 'spring',
+                            stiffness: 300,
+                            damping: 15,
+                          }}
+                        />
+                      )}
+                    </AnimatePresence>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
