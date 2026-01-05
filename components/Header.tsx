@@ -3,13 +3,18 @@
 import { Search, ChevronLeft, X, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import NotificationPanel from './Notification';
 
 const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  const router = useRouter();
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
@@ -99,8 +104,7 @@ const Header = () => {
   return (
     <>
       <motion.header
-        className="h-16 md:h-20 w-full bg-(--color-bg-primary) border-b-[1.5px] border-(--color-border) px-4 md:px-6 flex items-center justify-between sticky top-0 z-50"
-        // initial={{ y: -100 }}
+        className="h-16 md:h-20 w-full bg-(--color-bg-primary) border-b-[1.5px] border-(--color-border) px-4 md:px-6 flex items-center justify-between fixed top-0 left-0 z-50"
         animate={{ y: 0 }}
         transition={{
           type: 'spring',
@@ -173,6 +177,7 @@ const Header = () => {
         <div className="flex items-center gap-1 md:gap-3">
           <motion.button
             className="Button-small bg-(--color-bg-pressed) text-(--color-primary-500) rounded-full px-3 py-1.5 md:px-4 md:py-2 cursor-pointer whitespace-nowrap text-xs md:text-sm"
+            onClick={() => router.push('/course')}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.3 }}
@@ -195,6 +200,7 @@ const Header = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.3 }}
+            onClick={() => setIsNotificationOpen(true)}
           >
             <Image
               src="/notification.svg"
@@ -206,6 +212,11 @@ const Header = () => {
           </motion.button>
         </div>
       </motion.header>
+
+      <NotificationPanel
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+      />
 
       {/* Mobile Search Overlay */}
       <AnimatePresence>

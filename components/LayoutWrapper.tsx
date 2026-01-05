@@ -13,13 +13,13 @@ const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className="min-h-screen bg-(--color-bg-primary)">
+    <div className="h-screen overflow-hidden bg-(--color-bg-primary)">
       <Header />
+      <Sidebar />
 
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-6">{children}</main>
-      </div>
+      <main className="fixed top-16 md:top-20 left-0 lg:left-64 right-0 bottom-16 lg:bottom-0 overflow-y-auto p-3">
+        {children}
+      </main>
     </div>
   );
 };
