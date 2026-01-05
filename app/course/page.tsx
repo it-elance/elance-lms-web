@@ -54,7 +54,7 @@ const Course = () => {
             className="Heading-3 text-(--color-text-primary) mb-6"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.1 }}
           >
             What do you want to learn today?
           </motion.h1>
