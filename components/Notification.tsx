@@ -143,7 +143,7 @@ const Notification = ({ isOpen, onClose }: NotificationProps) => {
         {isOpen && (
           <motion.div
             key="notification-drawer"
-            className="fixed top-16 md:top-22 right-0 md:right-4 h-[calc(100vh-64px)] md:h-150 w-full md:w-100 bg-(--color-bg-primary) z-70 md:rounded-xl flex flex-col border-l md:border border-(--color-border-light) overflow-hidden"
+            className="fixed shadow-sm top-16 md:top-22 right-0 md:right-4 h-[calc(100vh-64px)] md:h-150 w-full md:w-100 bg-(--color-bg-primary) z-70 md:rounded-xl flex flex-col border-l md:border border-(--color-border-light) overflow-hidden"
             initial={{ x: '100%' }}
             animate={{
               x: 0,

@@ -103,14 +103,8 @@ const Videos = () => {
   };
 
   return (
-    <motion.div
-      className="min-h-full lg:h-[calc(100vh-6rem)] bg-(--color-bg-primary) relative flex flex-col"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      {/* Header Back Button */}
-      <motion.div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none">
+    <div className="flex flex-col h-[calc(100vh-6rem)] w-full relative">
+      <div className="sticky top-0 z-30 w-full flex justify-start pointer-events-none bg-(--color-bg-primary) py-4">
         <motion.button
           onClick={() => router.back()}
           className="rounded-full transition-colors pointer-events-auto cursor-pointer"
@@ -122,11 +116,11 @@ const Videos = () => {
         >
           <ChevronLeft className="w-6 h-6 text-(--color-text-primary)" />
         </motion.button>
-      </motion.div>
+      </div>
 
-      <div className="flex flex-col lg:flex-row gap-5 h-full overflow-hidden mt-3">
+      <div className="flex flex-col lg:flex-row gap-5 h-full overflow-hidden">
         {/* Left Column: Video Player & Info */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-4 overflow-y-auto">
+        <div className="w-full lg:w-1/2 flex flex-col gap-4 shrink-0 bg-(--color-bg-primary) pb-4 lg:pb-0 max-h-[60vh] overflow-y-auto lg:overflow-visible lg:max-h-full lg:overflow-y-auto">
           {/* Video Player Container */}
           <div className="relative aspect-video rounded-md overflow-hidden group">
             <Image
@@ -174,9 +168,9 @@ const Videos = () => {
         </div>
 
         {/* Right Column: Tabs & Syllabus */}
-        <div className="w-full lg:w-1/2 flex flex-col h-full">
+        <div className="w-full lg:w-1/2 flex flex-col flex-1 min-h-0 lg:h-full">
           {/* Tabs */}
-          <div className="flex w-full mb-4">
+          <div className="flex w-full mb-4 bg-(--color-bg-primary)">
             {['Lectures', 'Overview', 'Materials', 'Notes'].map((tab) => (
               <button
                 key={tab}
@@ -225,7 +219,7 @@ const Videos = () => {
                 </div>
 
                 {/* Course Content List */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div className="flex-1 overflow-y-auto lg:overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-3">
                     {chapters.map((chapter) => (
                       <div
@@ -374,7 +368,7 @@ const Videos = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="flex-1 flex flex-col overflow-hidden"
+                className="flex-1 overflow-y-auto custom-scrollbar"
               >
                 <Materials />
               </motion.div>
@@ -387,7 +381,7 @@ const Videos = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="flex-1 flex flex-col overflow-hidden"
+                className="flex-1 overflow-y-auto custom-scrollbar"
               >
                 <Notes />
               </motion.div>
@@ -395,7 +389,7 @@ const Videos = () => {
           </AnimatePresence>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

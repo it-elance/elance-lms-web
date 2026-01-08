@@ -34,7 +34,7 @@ const Course = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none">
+      <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none bg-(--color-bg-primary) py-4">
         <motion.button
           onClick={() => router.back()}
           className="rounded-full transition-colors pointer-events-auto cursor-pointer"
@@ -48,7 +48,7 @@ const Course = () => {
         </motion.button>
       </div>
 
-      <div className="flex-1 flex items-center justify-center -mt-20">
+      <div className="flex-1 flex items-center justify-center -mt-4">
         <div className="w-full max-w-xl">
           <motion.h1
             className="Heading-3 text-(--color-text-primary) mb-6"

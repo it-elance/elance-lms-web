@@ -10,7 +10,7 @@ const Analytics = () => {
 
   return (
     <div className="flex flex-col min-h-full w-full relative">
-      <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none bg-(--color-bg-primary)">
+      <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none bg-(--color-bg-primary) py-4">
         <motion.button
           onClick={() => router.back()}
           className="rounded-full transition-colors pointer-events-auto cursor-pointer"
@@ -35,7 +35,7 @@ const Analytics = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-4 pb-6 mt-10 grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div className="w-full max-w-7xl mx-auto px-4 pb-6 mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
         <div className="space-y-3">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

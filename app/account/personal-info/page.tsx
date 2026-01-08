@@ -10,7 +10,7 @@ const PersonalInfo = () => {
 
   return (
     <div className="flex flex-col min-h-full w-full relative">
-      <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none">
+      <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none bg-(--color-bg-primary) py-4">
         <motion.button
           onClick={() => router.back()}
           className="rounded-full transition-colors pointer-events-auto cursor-pointer"
@@ -35,7 +35,7 @@ const PersonalInfo = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-2xl mx-auto px-4 pb-6 mt-10">
+      <div className="w-full max-w-2xl mx-auto px-4 pb-6 mt-3">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
