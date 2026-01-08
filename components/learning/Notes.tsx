@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Note {
   id: number;
@@ -104,53 +105,70 @@ const Notes = () => {
       </div>
 
       {/* Add Note Modal Overlay */}
-      {isModalOpen &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/20"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) setIsModalOpen(false);
-            }}
-          >
-            <div className="bg-(--color-bg-primary) w-full max-w-sm p-6 rounded-xl shadow-lg border border-(--color-border) flex flex-col gap-6 animate-in fade-in zoom-in-95 duration-200">
-              {/* Header/Timestamp */}
-              <div className="flex items-center justify-between">
-                <span className="px-3 py-1 rounded-full bg-(--color-bg-tertiary) Overline text-(--color-text-primary)">
-                  0:21
-                </span>
-
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-(--color-text-disabled) hover:text-(--color-text-primary) cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Input Area */}
-              <textarea
-                value={newNote}
-                onChange={(e) => setNewNote(e.target.value)}
-                className="w-full text-base Body-Small text-(--color-text-primary) focus:outline-hidden resize-none bg-transparent"
-                placeholder="Type your note here..."
-                rows={3}
-                autoFocus
+      {/* Add Note Modal Overlay */}
+      {createPortal(
+        <AnimatePresence>
+          {isModalOpen && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) setIsModalOpen(false);
+                }}
+                className="absolute inset-0 bg-black/20"
               />
 
-              {/* Save Button */}
-              <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setNewNote('');
-                }}
-                className="w-full py-3 bg-(--color-primary-500) text-(--color-white) Button-Primary rounded-xl cursor-pointer"
+              {/* Modal Content */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.2 }}
+                className="relative bg-(--color-bg-primary) w-full max-w-sm p-6 rounded-xl shadow-lg border border-(--color-border) flex flex-col gap-6"
               >
-                Save Note
-              </button>
+                {/* Header/Timestamp */}
+                <div className="flex items-center justify-between">
+                  <span className="px-3 py-1 rounded-full bg-(--color-bg-tertiary) Overline text-(--color-text-primary)">
+                    0:21
+                  </span>
+
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="text-(--color-text-disabled) hover:text-(--color-text-primary) cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Input Area */}
+                <textarea
+                  value={newNote}
+                  onChange={(e) => setNewNote(e.target.value)}
+                  className="w-full text-base Body-Small text-(--color-text-primary) focus:outline-hidden resize-none bg-transparent"
+                  placeholder="Type your note here..."
+                  rows={3}
+                  autoFocus
+                />
+
+                {/* Save Button */}
+                <button
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setNewNote('');
+                  }}
+                  className="w-full py-3 bg-(--color-primary-500) text-(--color-white) Button-Primary rounded-xl cursor-pointer"
+                >
+                  Save Note
+                </button>
+              </motion.div>
             </div>
-          </div>,
-          document.body
-        )}
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 };
