@@ -18,7 +18,7 @@ const Sidebar = () => {
     },
     {
       name: 'My Learning',
-      href: '/my-learning',
+      href: '/learning',
       icon: '/school.svg',
       activeIcon: '/school-filled.svg',
     },
@@ -40,7 +40,9 @@ const Sidebar = () => {
     <aside className="fixed bottom-0 left-0 w-full h-16 bg-(--color-bg-primary) border-t-[1.5px] lg:border-t-0 lg:border-r-[1.5px] border-(--color-border-light) flex flex-row lg:flex-col items-center lg:items-stretch justify-around lg:justify-start lg:py-6 z-40 lg:w-64 lg:h-[calc(100vh-80px)] lg:fixed lg:top-20">
       <nav className="flex flex-row lg:flex-col w-full justify-around lg:justify-start lg:space-y-1 lg:px-4">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            pathname === item.href ||
+            (item.href !== '/home' && pathname.startsWith(`${item.href}/`));
 
           return (
             <MotionLink

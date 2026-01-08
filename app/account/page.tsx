@@ -15,7 +15,7 @@ const menuItems = [
   { icon: '/trend-up.svg', label: 'Analytics', href: '/account/analytics' },
   { icon: '/heart.svg', label: 'Favourites', href: '/favourites' },
   { icon: '/palette.svg', label: 'Theme Preferences', href: '/account/theme' },
-  { icon: '/book.svg', label: 'Course', href: '#' },
+  { icon: '/book.svg', label: 'Course', href: '/course' },
   {
     icon: '/user-circle.svg',
     label: 'Personal Information',
