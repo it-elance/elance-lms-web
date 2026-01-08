@@ -120,15 +120,16 @@ const Videos = () => {
 
       <div className="flex flex-col lg:flex-row gap-5 h-full overflow-hidden">
         {/* Left Column: Video Player & Info */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-4 shrink-0 bg-(--color-bg-primary) pb-4 lg:pb-0 max-h-[60vh] overflow-y-auto lg:overflow-visible lg:max-h-full lg:overflow-y-auto">
+        <div className="w-full lg:w-1/2 flex flex-col gap-4 shrink-0 bg-(--color-bg-primary) lg:pb-0 max-h-[60vh] overflow-y-auto lg:overflow-visible lg:max-h-full lg:overflow-y-auto">
           {/* Video Player Container */}
           <div className="relative aspect-video rounded-md overflow-hidden group">
             <Image
-              src="/video.svg"
+              src="/video.png"
               alt="Video Player"
               fill
               className="object-cover"
               priority
+              unoptimized
             />
           </div>
 
@@ -197,7 +198,7 @@ const Videos = () => {
                 className="flex-1 flex flex-col overflow-hidden"
               >
                 {/* Search */}
-                <div className="flex items-center w-full h-10 border border-(--color-border-medium) rounded-full px-5 gap-2 mb-6 focus:outline-none transition-colors custom-search-container">
+                <div className="flex items-center w-full h-10 border border-(--color-border-medium) rounded-full px-5 gap-2 mb-4 focus:outline-none transition-colors custom-search-container">
                   <Search className="w-4 h-4 text-(--color-text-primary) shrink-0" />
 
                   <input

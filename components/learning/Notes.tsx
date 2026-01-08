@@ -86,7 +86,7 @@ const Notes = () => {
         <div className="fixed bottom-16 left-0 right-0 z-50 p-4 lg:hidden">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="w-full py-3 px-4 bg-(--color-primary-500) text-(--color-white) Button-Primary rounded-xl flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-3 px-4 bg-(--color-primary-500) text-white Button-Primary rounded-xl flex items-center justify-center gap-2 cursor-pointer"
           >
             Add New Note
           </button>
@@ -109,7 +109,7 @@ const Notes = () => {
       {createPortal(
         <AnimatePresence>
           {isModalOpen && (
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-9999 flex items-center justify-center p-4">
               {/* Backdrop */}
               <motion.div
                 initial={{ opacity: 0 }}
