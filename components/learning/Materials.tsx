@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Image from 'next/image';
 
 interface Material {
@@ -41,59 +42,93 @@ const materials: Material[] = [
 ];
 
 const Materials = () => {
+  const [favorites, setFavorites] = useState<number[]>([]);
+
+  const toggleFavorite = (id: number) => {
+    setFavorites((prev) =>
+      prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]
+    );
+  };
+
   return (
     <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
       <div className="flex flex-col gap-2">
-        {materials.map((material) => (
-          <div
-            key={material.id}
-            className="flex items-center justify-between p-2 rounded-xl border border-transparent bg-(--color-bg-secondary) cursor-pointer group"
-          >
-            <div className="flex items-center gap-3 overflow-hidden">
-              {/* Icon Container */}
-              <div className="flex items-center justify-center shrink-0">
-                <Image
-                  src="/material.svg"
-                  alt="Material"
-                  width={90}
-                  height={90}
-                />
+        {materials.map((material) => {
+          const isFavorite = favorites.includes(material.id);
+          return (
+            <div
+              key={material.id}
+              className="flex items-center justify-between p-2 rounded-xl border border-transparent bg-(--color-bg-secondary) cursor-pointer group"
+            >
+              <div className="flex items-center gap-3 overflow-hidden">
+                {/* Icon Container */}
+                <div className="flex items-center justify-center shrink-0">
+                  <Image
+                    src="/material.svg"
+                    alt="Material"
+                    width={90}
+                    height={90}
+                  />
+                </div>
+
+                {/* Text Info */}
+                <div className="flex flex-col min-w-0">
+                  <h4 className="Body-Small text-(--color-text-primary) truncate pr-4">
+                    {material.title}
+                  </h4>
+
+                  <p className="Caption-Small text-(--color-text-tertiary) flex items-center gap-2 mt-2">
+                    <span>{material.type}</span>
+                    <span className="w-1 h-1 rounded-full bg-(--color-text-tertiary)"></span>
+                    <span>{material.size}</span>
+                  </p>
+                </div>
               </div>
 
-              {/* Text Info */}
-              <div className="flex flex-col min-w-0">
-                <h4 className="Body-Small text-(--color-text-primary) truncate pr-4">
-                  {material.title}
-                </h4>
-
-                <p className="Caption-Small text-(--color-text-tertiary) flex items-center gap-2 mt-2">
-                  <span>{material.type}</span>
-                  <span className="w-1 h-1 rounded-full bg-(--color-text-tertiary)"></span>
-                  <span>{material.size}</span>
-                </p>
+              {/* Actions */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => toggleFavorite(material.id)}
+                  className={`cursor-pointer transition-colors ${
+                    isFavorite
+                      ? 'text-(--color-primary-500)'
+                      : 'text-(--color-text-tertiary)'
+                  }`}
+                >
+                  <SvgIcon
+                    src={isFavorite ? '/heart-filled.svg' : '/heart.svg'}
+                    className="w-5 h-5 bg-current"
+                  />
+                </button>
               </div>
             </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-4 shrink-0">
-              <span className="Caption text-(--color-text-tertiary)">
-                Preview
-              </span>
-
-              <button className="text-(--color-text-tertiary) cursor-pointer">
-                <Image
-                  src="/download.svg"
-                  alt="Download"
-                  width={20}
-                  height={20}
-                />
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 };
 
 export default Materials;
+
+const SvgIcon = ({
+  src,
+  className = '',
+}: {
+  src: string;
+  className?: string;
+}) => (
+  <div
+    className={className}
+    style={{
+      maskImage: `url(${src})`,
+      WebkitMaskImage: `url(${src})`,
+      maskSize: 'contain',
+      WebkitMaskSize: 'contain',
+      maskRepeat: 'no-repeat',
+      WebkitMaskRepeat: 'no-repeat',
+      maskPosition: 'center',
+      WebkitMaskPosition: 'center',
+    }}
+  />
+);

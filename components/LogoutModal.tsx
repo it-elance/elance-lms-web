@@ -75,7 +75,7 @@ const LogoutModal = ({ isOpen, onClose, onLogout }: LogoutModalProps) => {
 
               <button
                 onClick={onClose}
-                className="w-full bg-white border border-(--color-border-medium) text-(--color-text-primary) py-3.5 rounded-xl Button-Primary cursor-pointer"
+                className="w-full border border-(--color-border-medium) text-(--color-text-primary) py-3.5 rounded-xl Button-Primary cursor-pointer"
               >
                 Cancel
               </button>

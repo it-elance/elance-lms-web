@@ -2,40 +2,44 @@
 
 import { motion } from 'framer-motion';
 import { Play, ChevronLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
 const Analytics = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const showHeader = searchParams.get('showHeader') === 'true';
 
   return (
     <div className="flex flex-col min-h-full w-full relative">
-      <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none bg-(--color-bg-primary) py-4">
-        <motion.button
-          onClick={() => router.back()}
-          className="rounded-full transition-colors pointer-events-auto cursor-pointer"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <ChevronLeft className="w-6 h-6 text-(--color-text-primary)" />
-        </motion.button>
-
-        <div className="flex items-center justify-center relative w-full">
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="Heading-3 text-(--color-text-primary)"
+      {showHeader && (
+        <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none bg-(--color-bg-primary) py-4">
+          <motion.button
+            onClick={() => router.back()}
+            className="rounded-full transition-colors pointer-events-auto cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
           >
-            Analytics
-          </motion.h1>
-        </div>
-      </div>
+            <ChevronLeft className="w-6 h-6 text-(--color-text-primary)" />
+          </motion.button>
 
-      <div className="w-full max-w-7xl mx-auto px-4 pb-6 mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="flex items-center justify-center relative w-full">
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="Heading-3 text-(--color-text-primary)"
+            >
+              Analytics
+            </motion.h1>
+          </div>
+        </div>
+      )}
+
+      <div className="w-full max-w-7xl mx-auto pb-6 mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
         <div className="space-y-3">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

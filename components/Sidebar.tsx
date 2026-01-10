@@ -29,6 +29,12 @@ const Sidebar = () => {
       activeIcon: '/heart-filled.svg',
     },
     {
+      name: 'Analytics',
+      href: '/analytics',
+      icon: '/trend-up.svg',
+      activeIcon: '/trend-up-home.svg',
+    },
+    {
       name: 'Account',
       href: '/account',
       icon: '/user.svg',
@@ -48,16 +54,13 @@ const Sidebar = () => {
             <MotionLink
               key={item.name}
               href={item.href}
-              className={`flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-3 p-2 lg:px-4 lg:py-3 rounded-lg text-[10px] lg:text-sm font-medium transition-colors ${
+              className={`flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-3 p-2 lg:px-4 lg:py-3 rounded-lg text-[10px] lg:text-sm font-medium ${
                 isActive
                   ? 'text-(--color-primary-500)'
-                  : 'text-(--color-text-primary) hover:bg-(--color-bg-tertiary)'
+                  : 'text-(--color-text-primary)'
               }`}
               whileHover={{
                 scale: 1.02,
-                backgroundColor: isActive
-                  ? undefined
-                  : 'var(--color-bg-tertiary)',
               }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}

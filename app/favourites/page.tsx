@@ -132,6 +132,9 @@ const mockFavourites: FavouriteItem[] = [
 
 const Favourites = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'Lectures' | 'Materials'>(
+    'Lectures'
+  );
   const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -269,6 +272,29 @@ const Favourites = () => {
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="flex items-center gap-6 border-b border-(--color-border-light) mb-3">
+          {['Lectures', 'Materials'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab as 'Lectures' | 'Materials')}
+              className={`px-6 pb-2 Body-Small transition-colors relative cursor-pointer ${
+                activeTab === tab
+                  ? 'text-(--color-primary-500)'
+                  : 'text-(--color-text-tertiary)'
+              }`}
+            >
+              {tab}
+              {activeTab === tab && (
+                <motion.div
+                  layoutId="favouritesActiveTab"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-(--color-primary-500)"
+                />
+              )}
+            </button>
+          ))}
+        </div>
+
         {/* Filters */}
         <div className="w-full bg-(--color-bg-primary)">
           <div className="flex items-center gap-3">
@@ -362,12 +388,18 @@ const Favourites = () => {
 
                 {/* Metadata */}
                 <div className="flex items-center gap-2">
-                  <span className="px-1.5 py-0.5 text-[10px] uppercase font-bold text-(--color-text-secondary) border border-(--color-border-medium) rounded bg-white">
+                  <span className="px-1.5 py-0.5 text-[10px] uppercase font-bold text-(--color-text-secondary) border border-(--color-border-medium) rounded">
                     {item.tag}
                   </span>
 
                   <span className="Caption-Small text-(--color-text-secondary) truncate">
                     {item.chapter}
+                  </span>
+
+                  <div className="w-px h-3 bg-(--color-text-disabled) rounded-full" />
+
+                  <span className="Caption-Small text-(--color-text-secondary) truncate">
+                    Topic Name
                   </span>
                 </div>
               </div>
@@ -403,10 +435,6 @@ const Favourites = () => {
                       >
                         <button className="w-full text-left px-2 py-2 Body-Small text-(--color-text-primary) border-b border-(--color-border-light) cursor-pointer hover:bg-(--color-bg-tertiary) rounded-md transition-colors">
                           View chapter details
-                        </button>
-
-                        <button className="w-full text-left px-2 py-2 Body-Small text-(--color-text-primary) border-b border-(--color-border-light) cursor-pointer hover:bg-(--color-bg-tertiary) rounded-md transition-colors">
-                          Add to downloads
                         </button>
 
                         <button className="w-full text-left px-2 py-2 Body-Small text-(--color-error-600) cursor-pointer hover:bg-(--color-bg-tertiary) rounded-md transition-colors">

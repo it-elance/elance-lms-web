@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
   title: 'Elance Learning',
@@ -9,12 +10,41 @@ export const metadata: Metadata = {
   },
 };
 
-const RootLayout = ({ children }: { children: React.ReactNode }) => (
-  <html lang="en">
-    <body>
-      <LayoutWrapper>{children}</LayoutWrapper>
-    </body>
-  </html>
-);
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+      (function () {
+        try {
+          const theme = localStorage.getItem('theme');
+          const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-export default RootLayout;
+          if (theme === 'dark' || (!theme && isDark)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.style.colorScheme = 'dark';
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+            document.documentElement.style.colorScheme = 'light';
+          }
+        } catch (_) {}
+      })();
+    `,
+          }}
+        />
+      </head>
+
+      <body>
+        <ThemeProvider>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}

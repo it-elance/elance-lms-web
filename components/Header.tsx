@@ -4,6 +4,7 @@ import { Search, ChevronLeft, X, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@/components/ThemeProvider';
 import Image from 'next/image';
 import Link from 'next/link';
 import NotificationPanel from './Notification';
@@ -13,6 +14,7 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const { resolvedTheme } = useTheme();
 
   const router = useRouter();
 
@@ -116,7 +118,9 @@ const Header = () => {
         <Link href="/home" className="flex items-center gap-3 cursor-pointer">
           <motion.div whileHover={{ scale: 1.01 }}>
             <Image
-              src="/elance.svg"
+              src={
+                resolvedTheme === 'dark' ? '/elance-dark.svg' : '/elance.svg'
+              }
               alt="Elance Logo"
               width={140}
               height={40}
@@ -139,7 +143,7 @@ const Header = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
-                className="w-full pl-11 pr-10 py-2 bg-(--color-bg-secondary) border border-(--color-border-medium) focus:border-(--color-border-medium) rounded-full outline-none text-sm text-(--color-text-primary) placeholder:text-(--color-text-disabled) transition-all"
+                className="w-full pl-11 pr-10 py-2 bg-(--color-bg-secondary) border border-(--color-border-medium) focus:border-(--color-border-medium) rounded-full outline-none text-sm text-(--color-text-primary) placeholder:text-(--color-text-disabled)"
               />
 
               {searchQuery && (
@@ -203,7 +207,11 @@ const Header = () => {
             onClick={() => setIsNotificationOpen(true)}
           >
             <Image
-              src="/notification.svg"
+              src={
+                resolvedTheme === 'dark'
+                  ? '/notification-dark.svg'
+                  : '/notification.svg'
+              }
               alt="Notification"
               width={24}
               height={24}
@@ -222,7 +230,7 @@ const Header = () => {
       <AnimatePresence>
         {isSearchOpen && (
           <motion.div
-            className="fixed inset-0 bg-white z-60 flex flex-col p-4 lg:hidden"
+            className="fixed inset-0 bg-(--color-bg-primary) z-60 flex flex-col p-4 lg:hidden"
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}

@@ -12,10 +12,21 @@ const menuItems = [
     label: 'Admissions Details',
     href: '/account/admission-details',
   },
-  { icon: '/trend-up.svg', label: 'Analytics', href: '/account/analytics' },
-  { icon: '/heart.svg', label: 'Favourites', href: '/favourites' },
-  { icon: '/palette.svg', label: 'Theme Preferences', href: '/account/theme' },
-  { icon: '/book.svg', label: 'Course', href: '/course' },
+  {
+    icon: '/trend-up.svg',
+    label: 'Analytics',
+    href: '/analytics?showHeader=true',
+  },
+  {
+    icon: '/palette.svg',
+    label: 'Theme Preferences',
+    href: '/account/theme',
+  },
+  {
+    icon: '/book.svg',
+    label: 'Course',
+    href: '/course',
+  },
   {
     icon: '/user-circle.svg',
     label: 'Personal Information',

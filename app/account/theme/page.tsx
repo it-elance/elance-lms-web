@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '@/components/ThemeProvider';
 
 const Theme = () => {
   const router = useRouter();
-  const [theme, setTheme] = useState('dark');
+  const { theme, setTheme } = useTheme();
 
   const options = [
     { label: 'Light', value: 'light' },
@@ -15,13 +15,8 @@ const Theme = () => {
     { label: 'Device default settings', value: 'system' },
   ];
 
-  const handleSelect = (val: string) => {
+  const handleSelect = (val: 'light' | 'dark' | 'system') => {
     setTheme(val);
-    if (val === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else if (val === 'light') {
-      document.documentElement.removeAttribute('data-theme');
-    }
   };
 
   return (
@@ -61,7 +56,9 @@ const Theme = () => {
           {options.map((option, index) => (
             <div key={option.value}>
               <button
-                onClick={() => handleSelect(option.value)}
+                onClick={() =>
+                  handleSelect(option.value as 'light' | 'dark' | 'system')
+                }
                 className="w-full flex items-center justify-between p-5 transition-colors text-left cursor-pointer"
               >
                 <span className="text-(--color-text-primary) Body-Small">
