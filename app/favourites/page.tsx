@@ -348,7 +348,7 @@ const Favourites = () => {
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto mt-3">
+      <div className="flex-1 mt-3">
         <div className="flex flex-col gap-2">
           {filteredItems.map((item, index) => (
             <motion.div

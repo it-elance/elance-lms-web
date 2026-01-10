@@ -220,7 +220,7 @@ const Videos = () => {
                 </div>
 
                 {/* Course Content List */}
-                <div className="flex-1 overflow-y-auto lg:overflow-y-auto custom-scrollbar">
+                <div className="flex-1 overflow-y-auto custom-scrollbar scrollbar-hide">
                   <div className="flex flex-col gap-3">
                     {chapters.map((chapter) => (
                       <div
@@ -369,7 +369,7 @@ const Videos = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="flex-1 overflow-y-auto custom-scrollbar"
+                className="flex-1 overflow-y-auto custom-scrollbar scrollbar-hide"
               >
                 <Materials />
               </motion.div>

@@ -17,7 +17,7 @@ const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
       <Header />
       <Sidebar />
 
-      <main className="fixed top-16 md:top-20 left-0 lg:left-64 right-0 bottom-16 lg:bottom-0 overflow-y-auto px-3 pb-3">
+      <main className="fixed top-16 md:top-20 left-0 lg:left-64 right-0 bottom-16 lg:bottom-0 overflow-y-auto overflow-x-hidden px-3 pb-3">
         {children}
       </main>
     </div>

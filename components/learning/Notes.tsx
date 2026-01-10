@@ -38,7 +38,7 @@ const Notes = () => {
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-      <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-24">
+      <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-24 scrollbar-hide">
         <div className="flex flex-col">
           {notes.map((note) => (
             <div
