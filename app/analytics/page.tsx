@@ -3,9 +3,10 @@
 import { motion } from 'framer-motion';
 import { Play, ChevronLeft } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import Image from 'next/image';
 
-const Analytics = () => {
+const AnalyticsContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const showHeader = searchParams.get('showHeader') === 'true';
@@ -264,6 +265,14 @@ const Analytics = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const Analytics = () => {
+  return (
+    <Suspense>
+      <AnalyticsContent />
+    </Suspense>
   );
 };
 
