@@ -1,0 +1,338 @@
+@import 'tailwindcss';
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'); */
+
+:root {
+  /* indigo 100 */
+  --indigo-100: #eef0ff;
+
+  /* indigo 600 */
+  --indigo-600: #4f46e5;
+
+  /* Mint 100 */
+  --mint-100: #e6faf8;
+
+  /* Mint 600 */
+  --mint-600: #2bb0a6;
+
+  /* Amber Gold 100 */
+  --amber-gold-100: #fff4dd;
+
+  /* Amber Gold 600 */
+  --amber-gold-600: #d6a34a;
+
+  /* Lavender 100 */
+  --lavender-100: #f1ebff;
+
+  /* Lavender 600 */
+  --lavender-600: #7a3ef3;
+
+  /* Rose 100 */
+  --rose-100: #ffeaf3;
+
+  /* Rose 600 */
+  --rose-600: #e06c9f;
+
+  /* Sky 100 */
+  --sky-100: #eaf5ff;
+
+  /* Sky 600 */
+  --sky-600: #4aa3df;
+
+  /* Color */
+  --color-primary-500: #2a74f3;
+  --color-primary-400: #4a8af6;
+  --color-primary-200: #a8ccfd;
+  --color-primary-100: #d9e8ff;
+
+  --color-secondary-600: #0a468c;
+  --color-secondary-400: #1570d6;
+  --color-secondary-200: #9fcffb;
+
+  --color-bg-primary: #fff;
+  --color-bg-secondary: #f9fafb;
+  --color-bg-tertiary: #f3f5f7;
+  --color-bg-card: #fff;
+  --color-bg-hover: rgba(20, 101, 241, 0.04);
+
+  --color-primary-600: #1465f1;
+  --color-bg-pressed: rgba(20, 101, 241, 0.1);
+
+  --color-text-primary: #1a1d21;
+  --color-text-secondary: #4a4f55;
+  --color-text-tertiary: #6a7077;
+  --color-text-disabled: #b4b9bf;
+  --color-text-on-primary: #fff;
+
+  --color-border-light: #f3f5f7;
+  --color-border-medium: #e8ebee;
+  --color-border-strong: #d4d8dd;
+  --color-border: #e8ebee;
+
+  --color-success-600: #24a148;
+  --color-success-500: #3dbe63;
+  --color-success-100: #dff5e7;
+
+  --color-warning-600: #ca6f1e;
+  --color-warning-500: #f29d3a;
+  --color-warning-100: #fff3dd;
+
+  --color-error-600: #d63a30;
+  --color-error-500: #e85950;
+  --color-error-100: #fde2e0;
+
+  --color-info-600: #1366d9;
+  --color-info-500: #3e8bf7;
+  --color-info-100: #dcebff;
+
+  --color-white: #fff;
+  --color-black: #0f1115;
+
+  /* Font */
+  .Display-XL {
+    font-family: 'Inter', sans-serif;
+    font-size: 48px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.17;
+    letter-spacing: -0.48px;
+  }
+
+  .Display-L {
+    font-family: 'Inter', sans-serif;
+    font-size: 48px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.17;
+    letter-spacing: -0.48px;
+  }
+
+  .Heading-1 {
+    font-family: 'Inter', sans-serif;
+    font-size: 32px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.25;
+    letter-spacing: -0.16px;
+  }
+
+  .Heading-2 {
+    font-family: 'Inter', sans-serif;
+    font-size: 28px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.29;
+    letter-spacing: -0.06px;
+  }
+
+  .Heading-3 {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.33;
+    letter-spacing: normal;
+  }
+
+  .Heading-4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.4;
+    letter-spacing: normal;
+  }
+
+  .Body-Large {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.56;
+    letter-spacing: normal;
+  }
+
+  .Button-Primary {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.5;
+    letter-spacing: normal;
+  }
+
+  .Body-Medium {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.5;
+    letter-spacing: normal;
+  }
+
+  .Button-Small {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.43;
+    letter-spacing: normal;
+  }
+
+  .Navigation-Tab {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.43;
+    letter-spacing: normal;
+  }
+
+  .Body-Small {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.43;
+    letter-spacing: normal;
+  }
+
+  .Caption {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.23;
+    letter-spacing: 0.26px;
+  }
+
+  .Overline {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.33;
+    letter-spacing: 0.24px;
+  }
+
+  .Body-Extra-Small {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.33;
+    letter-spacing: normal;
+  }
+
+  .Caption-Small {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.27;
+    letter-spacing: 0.22px;
+  }
+}
+
+[data-theme='dark'] {
+  /* indigo 100 */
+  --indigo-100: #23224a;
+
+  /* indigo 600 */
+  --indigo-600: #9aa0ff;
+
+  /* Mint 100 */
+  --mint-100: #1c3a38;
+
+  /* Mint 600 */
+  --mint-600: #6addd4;
+
+  /* Amber Gold 100 */
+  --amber-gold-100: #3a2f1c;
+
+  /* Amber Gold 600 */
+  --amber-gold-600: #f0c674;
+
+  /* Lavender 100 */
+  --lavender-100: #2a2144;
+
+  /* Lavender 600 */
+  --lavender-600: #a58bff;
+
+  /* Rose 100 */
+  --rose-100: #3a1f2c;
+
+  /* Rose 600 */
+  --rose-600: #ff9bc4;
+
+  /* Sky 100 */
+  --sky-100: #1e2f3a;
+
+  /* Sky 600 */
+  --sky-600: #8ec9f2;
+
+  /* Color */
+  --color-primary-500: #2a74f3;
+  --color-primary-400: #4a8af6;
+  --color-primary-200: #a8ccfd;
+  --color-primary-100: #d9e8ff;
+  --color-secondary-600: #0a468c;
+  --color-secondary-400: #1570d6;
+  --color-secondary-200: #9fcffb;
+  --color-bg-primary: #0f1115;
+  --color-bg-secondary: #1a1d21;
+  --color-bg-tertiary: #2b2f33;
+  --color-bg-card: #1a1d21;
+  --color-bg-hover: rgba(255, 255, 255, 0.05);
+  --color-primary-600: #1465f1;
+  --color-bg-pressed: rgba(255, 255, 255, 0.12);
+  --color-text-primary: #fff;
+  --color-text-secondary: #d4d8dd;
+  --color-text-tertiary: #a8aeb5;
+  --color-text-disabled: #6a7077;
+  --color-text-on-primary: #fff;
+  --color-border-light: #2b2f33;
+  --color-border-medium: #4a4f55;
+  --color-border-strong: #6a7077;
+  --color-border: #2b2f33;
+  --color-success-600: #3dbe63;
+  --color-success-500: #289e4f;
+  --color-success-100: #163e26;
+  --color-warning-600: #f29d3a;
+  --color-warning-500: #d9822f;
+  --color-warning-100: #3d2a14;
+  --color-error-600: #e85950;
+  --color-error-500: #c73c35;
+  --color-error-100: #4f1d19;
+  --color-info-600: #3e8bf7;
+  --color-info-500: #2b6ecc;
+  --color-info-100: #122c47;
+  --color-white: #fff;
+  --color-black: #0f1115;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

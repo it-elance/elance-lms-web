@@ -1,0 +1,270 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { Play, ChevronLeft } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
+
+const Analytics = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const showHeader = searchParams.get('showHeader') === 'true';
+
+  return (
+    <div className="flex flex-col min-h-full w-full relative">
+      {showHeader && (
+        <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none bg-(--color-bg-primary) py-4">
+          <motion.button
+            onClick={() => router.back()}
+            className="rounded-full transition-colors pointer-events-auto cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <ChevronLeft className="w-6 h-6 text-(--color-text-primary)" />
+          </motion.button>
+
+          <div className="flex items-center justify-center relative w-full">
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="Heading-3 text-(--color-text-primary)"
+            >
+              Analytics
+            </motion.h1>
+          </div>
+        </div>
+      )}
+
+      <div className="w-full max-w-7xl mx-auto pb-6 mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="space-y-3">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="bg-(--color-bg-hover) rounded-xl p-5"
+          >
+            <h2 className="Heading-4 text-(--color-text-primary) mb-6">ACCA</h2>
+
+            <div className="flex flex-col items-center mb-8">
+              <div className="relative w-28 h-28">
+                <svg
+                  className="w-full h-full transform -rotate-90"
+                  viewBox="0 0 120 120"
+                >
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="54"
+                    fill="none"
+                    stroke="var(--color-bg-tertiary)"
+                    strokeWidth="12"
+                  />
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="54"
+                    fill="none"
+                    stroke="var(--color-success-600)"
+                    strokeWidth="12"
+                    strokeDasharray="339.292"
+                    strokeDashoffset={339.292 * (1 - 0.74)}
+                    strokeLinecap="round"
+                  />
+                </svg>
+
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="Heading-2 text-(--color-text-primary)">
+                    74%
+                  </span>
+                </div>
+              </div>
+
+              <p className="mt-3 text-(--color-text-secondary) Body-Extra-Small">
+                Total Course Progress
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <p className="Body-Small text-(--color-text-Primary)">
+                Estimated 12 hours left to complete ACCA
+              </p>
+
+              <p className="Body-Small text-(--color-text-Primary)">
+                Your pace is ahead of 62% of students
+              </p>
+
+              <p className="Body-Small text-(--color-text-Primary)">
+                You may complete this course by March 18
+              </p>
+
+              <div className="pt-4 flex justify-between items-end">
+                <span className="text-(--color-text-tertiary) Caption-Small">
+                  18/46 Chapters Completed
+                </span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Videos Completed Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="bg-(--color-bg-hover) rounded-xl p-5 flex justify-between items-center"
+          >
+            <span className="text-(--color-text-secondary) Caption">
+              Completed videos
+            </span>
+
+            <span className="Body-Large text-(--color-text-primary)">
+              90/350
+            </span>
+          </motion.div>
+
+          {/* Weekly Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="bg-(--color-bg-hover) rounded-xl p-5 flex flex-col items-center text-center"
+          >
+            <div className="text-(--color-info-500) mb-4">
+              <Image
+                src="/thumbs-up.svg"
+                alt="Thumbs Up"
+                width={47}
+                height={53}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <p className="text-(--color-text-primary) Navigation-Tab">
+                Watched 10 hours this week
+              </p>
+
+              <p className="text-(--color-text-secondary) Navigation-Tab">
+                Completed 3 modules this month
+              </p>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-3">
+          {/* Watch Time Chart */}
+          <motion.h3
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-(--color-text-tertiary) Body-Extra-Small"
+          >
+            Watch Time/ Study Activity
+          </motion.h3>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="border border-(--color-border-medium) rounded-xl p-5"
+          >
+            <div className="flex justify-between">
+              <div className="flex flex-col justify-between">
+                <div>
+                  <p className="text-(--color-text-secondary) Caption mb-1">
+                    This Week :
+                  </p>
+
+                  <p className="Heading-4 text-(--color-text-primary)">
+                    12 hr 45 m
+                  </p>
+                </div>
+
+                <p className="text-(--color-text-secondary) Caption">
+                  Avg/ Day{' '}
+                  <span className="text-(--color-text-primary) Navigation-Tab ml-1">
+                    1 hr 40 min
+                  </span>
+                </p>
+              </div>
+
+              {/* Bar Chart Visualization */}
+              <div className="flex items-end gap-2 pb-1 border border-(--color-border-light) rounded-md px-3 pt-4 h-24">
+                {[0.4, 0.6, 1, 0.8, 0.5, 0.9, 0.3].map((h, i) => (
+                  <div
+                    key={i}
+                    className="group relative flex flex-col items-center gap-2 h-full justify-end"
+                  >
+                    <div
+                      className="w-3 bg-(--color-success-600) rounded-t-sm"
+                      style={{ height: `${h * 70}%` }}
+                    />
+                    <span className="text-[10px] text-(--color-text-disabled)">
+                      {['S', 'M', 'T', 'W', 'T', 'F', 'S'][i]}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Recently Watched */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-4"
+          >
+            <h3 className="text-(--color-text-tertiary) Body-Extra-Small">
+              Recently watched videos
+            </h3>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="border border-(--color-border-medium) rounded-xl overflow-hidden p-3"
+          >
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((item, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-2 transition-colors bg-(--color-bg-secondary) rounded-xl cursor-pointer group"
+                >
+                  <div className="relative w-22 h-14 rounded-md overflow-hidden bg-gray-200 shrink-0">
+                    <Image
+                      src={`https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&auto=format&fit=crop&q=60`}
+                      alt="Thumbnail"
+                      className="object-cover"
+                      fill
+                    />
+
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+                      <Play size={12} className="text-white fill-current" />
+                    </div>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-(--color-text-primary) Body-Small truncate">
+                      Understanding Different Types of...
+                    </p>
+                  </div>
+
+                  <span className="text-(--color-text-tertiary) Caption me-2">
+                    Preview
+                  </span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Analytics;
