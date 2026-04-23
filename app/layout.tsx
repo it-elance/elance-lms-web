@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import ThemeProvider from '@/components/ThemeProvider';
+import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   title: 'Elance Learning',
@@ -38,6 +39,17 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
 
       <body>
         <ThemeProvider>
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              style: {
+                background: 'var(--color-bg-secondary)',
+                color: 'var(--color-text-primary)',
+                border: '1px solid var(--color-border-medium)',
+              },
+            }}
+          />
+
           <LayoutWrapper>{children}</LayoutWrapper>
         </ThemeProvider>
       </body>

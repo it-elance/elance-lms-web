@@ -4,16 +4,34 @@ import Rive from '@rive-app/react-canvas';
 import { ChevronLeft } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Variants } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { loginApi, verifyOtpApi } from '@/services/api.service';
+import type { Variants } from 'framer-motion';
+import type { LoginPayload } from '@/types/auth.types';
+import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 type Step = 'SPLASH' | 'MOBILE' | 'EMAIL' | 'OTP';
+
+interface AxiosErrorShape {
+  response?: { data?: { message?: string } };
+}
+
+const getErrorMessage = (error: unknown, fallback: string): string => {
+  const err = error as AxiosErrorShape;
+  return err?.response?.data?.message ?? fallback;
+};
 
 const Login = () => {
   const [step, setStep] = useState<Step>('SPLASH');
   const [previousStep, setPreviousStep] = useState<Step>('MOBILE');
   const [otp, setOtp] = useState(['', '', '', '']);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
+  const [seconds, setSeconds] = useState(30);
+  const [canResend, setCanResend] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const router = useRouter();
@@ -26,17 +44,35 @@ const Login = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (step === 'OTP') {
+      if (seconds > 0) {
+        const timer = setTimeout(() => {
+          setSeconds((prev) => prev - 1);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+      } else {
+        setCanResend(true);
+      }
+    }
+  }, [seconds, step]);
+
+  // handle phone change
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '');
+
     if (value.length <= 10) {
       setPhoneNumber(value);
     }
   };
 
+  // handle otp change
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) {
       value = value.slice(-1);
     }
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
@@ -46,6 +82,7 @@ const Login = () => {
     }
   };
 
+  // handle keydown
   const handleKeyDown = (
     index: number,
     e: React.KeyboardEvent<HTMLInputElement>
@@ -53,9 +90,18 @@ const Login = () => {
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       otpRefs.current[index - 1]?.focus();
     }
+
+    if (e.key === 'Enter' && index === 3 && !isLoading) {
+      handleVerifyOtp();
+    }
   };
 
+  // handle back
   const handleBack = () => {
+    setOtp(['', '', '', '']);
+    setPhoneNumber('');
+    setEmail('');
+
     if (step === 'OTP') {
       setStep(previousStep);
     } else {
@@ -63,9 +109,83 @@ const Login = () => {
     }
   };
 
-  const handleLogin = () => {
-    setPreviousStep(step);
-    setStep('OTP');
+  // handle login
+  const handleLogin = async () => {
+    try {
+      setIsLoading(true);
+
+      const payload: LoginPayload =
+        step === 'EMAIL'
+          ? { type: 'email', email }
+          : { type: 'phone', phoneNumber: `+91${phoneNumber}` };
+
+      await loginApi(payload);
+
+      setPreviousStep(step);
+      setStep('OTP');
+      setSeconds(30);
+      setCanResend(false);
+
+      toast.success('OTP sent successfully');
+    } catch (error: unknown) {
+      console.error('Failed to send OTP:', error);
+      toast.error(getErrorMessage(error, 'Failed to send OTP'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // handle resend otp
+  const handleResendOtp = async () => {
+    if (isResending) return;
+
+    try {
+      setIsResending(true);
+      const payload: LoginPayload =
+        previousStep === 'EMAIL'
+          ? { type: 'email', email }
+          : { type: 'phone', phoneNumber: `+91${phoneNumber}` };
+
+      await loginApi(payload);
+
+      setSeconds(30);
+      setCanResend(false);
+
+      toast.success('OTP resent successfully');
+    } catch (error: unknown) {
+      console.error('Resend failed', error);
+      toast.error(getErrorMessage(error, 'Failed to resend OTP'));
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  // handle verify otp
+  const handleVerifyOtp = async () => {
+    try {
+      setIsLoading(true);
+
+      const payload: LoginPayload =
+        previousStep === 'EMAIL'
+          ? { type: 'email', email, otp: otp.join('') }
+          : {
+              type: 'phone',
+              phoneNumber: `+91${phoneNumber}`,
+              otp: otp.join(''),
+            };
+
+      const res = await verifyOtpApi(payload);
+      localStorage.setItem('accessToken', res.token);
+
+      toast.success('Login successful');
+
+      router.push('/home');
+    } catch (error: unknown) {
+      console.error('Failed to verify OTP:', error);
+      toast.error(getErrorMessage(error, 'Invalid OTP'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Animation variants
@@ -156,8 +276,33 @@ const Login = () => {
       animate="visible"
       exit="exit"
       variants={containerVariants}
-      className="flex h-screen w-full flex-col items-center justify-between md:justify-center bg-(--color-bg-primary) md:bg-(--color-bg-secondary) p-4 md:p-4"
+      className="relative flex h-screen w-full flex-col items-center justify-between md:justify-center bg-(--color-bg-primary) p-4 md:p-4 overflow-hidden"
     >
+      <motion.div
+        className="hidden lg:block absolute inset-0 w-full h-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* background image */}
+        <Image
+          src="/login-bg.svg"
+          alt=""
+          fill
+          className="absolute inset-0 object-cover w-full h-full opacity-80"
+        />
+
+        {/* character image */}
+        <Image
+          src="/mammootty.png"
+          alt="mammootty"
+          width={550}
+          height={600}
+          className="absolute bottom-0 lg:left-20 h-auto w-137.5 object-contain z-10"
+        />
+      </motion.div>
+
+      {/* form container */}
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
@@ -165,7 +310,7 @@ const Login = () => {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="flex h-full w-full flex-col bg-transparent p-0 md:h-auto md:w-95 md:block md:rounded-lg md:bg-(--color-bg-primary) md:p-8 shadow-xs"
+          className="relative z-20 flex h-full w-full flex-col bg-transparent py-2 px-0 md:h-auto md:w-95 md:block md:rounded-lg md:bg-(--color-bg-primary) md:border md:border-(--color-border-medium) md:p-8 shadow-xs"
         >
           {/* back button */}
           {step !== 'MOBILE' && (
@@ -190,7 +335,7 @@ const Login = () => {
               initial="hidden"
               animate="visible"
               transition={{ delay: 0.15 }}
-              className="Heading-4 text-(--color-text-primary)"
+              className="Heading-4 text-(--color-text-primary) mb-1"
             >
               {step === 'MOBILE' && 'Enter your mobile number'}
               {step === 'EMAIL' && 'Enter your email address'}
@@ -241,6 +386,7 @@ const Login = () => {
 
                       <div className="flex w-full items-center gap-2 rounded-4xl border border-(--color-border-medium) bg-(--color-bg-secondary) p-3 mt-1">
                         <SvgIcon src="/globe.svg" className="h-6 w-6" />
+
                         <input
                           type="text"
                           value="India (+91)"
@@ -263,6 +409,7 @@ const Login = () => {
 
                       <div className="flex w-full items-center gap-2 rounded-4xl border border-(--color-border-medium) bg-(--color-bg-secondary) p-3 mt-1">
                         <SvgIcon src="/phone.svg" className="h-6 w-6" />
+
                         <input
                           type="tel"
                           value={phoneNumber}
@@ -270,6 +417,9 @@ const Login = () => {
                           maxLength={10}
                           placeholder="Enter your mobile number"
                           className="w-full bg-(--color-bg-secondary) body-Small outline-none placeholder:text-(--color-text-disabled)"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !isLoading) handleLogin();
+                          }}
                         />
                       </div>
                     </motion.div>
@@ -294,8 +444,13 @@ const Login = () => {
                       <SvgIcon src="/mail.svg" className="h-6 w-6" />
                       <input
                         type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter your email address"
                         className="w-full bg-(--color-bg-secondary) body-Small outline-none placeholder:text-(--color-text-disabled)"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !isLoading) handleLogin();
+                        }}
                       />
                     </div>
                   </motion.div>
@@ -321,13 +476,11 @@ const Login = () => {
                         {[0, 1, 2, 3].map((index) => (
                           <motion.div
                             key={index}
-                            initial={{ scale: 0, opacity: 0 }}
+                            initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{
-                              type: 'spring',
-                              stiffness: 200,
-                              damping: 25,
-                              delay: index * 0.1,
+                              duration: 0.2,
+                              delay: index * 0.05,
                             }}
                             whileHover={{ scale: 1.05 }}
                             className="relative h-14 w-14 rounded-full border border-(--color-border-medium)"
@@ -352,15 +505,29 @@ const Login = () => {
 
                     {/* resend otp */}
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 }}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2, duration: 0.2 }}
                     >
-                      <p className="Button-Small text-(--color-text-disabled)">
-                        Resend OTP{' '}
-                        <span className="Caption-Small text-(--color-text-primary)">
-                          in 30:00
+                      <p className="Button-Small">
+                        <span
+                          onClick={canResend ? handleResendOtp : undefined}
+                          className={`${
+                            canResend
+                              ? `text-(--color-primary-500) cursor-pointer ${isResending ? 'opacity-50 pointer-events-none' : ''}`
+                              : 'text-(--color-text-disabled)'
+                          }`}
+                        >
+                          {isResending ? 'Sending...' : 'Resend OTP'}
                         </span>
+
+                        {!canResend && (
+                          <span className="Caption-Small text-(--color-text-primary) ml-1">
+                            in{' '}
+                            {String(Math.floor(seconds / 60)).padStart(2, '0')}:
+                            {String(seconds % 60).padStart(2, '0')}
+                          </span>
+                        )}
                       </p>
                     </motion.div>
                   </motion.div>
@@ -380,33 +547,43 @@ const Login = () => {
             {step === 'OTP' ? (
               <motion.button
                 variants={buttonVariants}
-                whileHover="hover"
-                // whileTap="tap"
-                className="w-full Button-Primary rounded-xl bg-(--color-primary-500) py-3 text-(--color-white) cursor-pointer"
-                onClick={() => router.push('/home')}
+                whileHover={isLoading ? undefined : 'hover'}
+                className={`w-full flex items-center justify-center Button-Primary rounded-xl bg-(--color-primary-500) py-3 text-white ${isLoading ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                onClick={handleVerifyOtp}
+                disabled={isLoading}
               >
-                Continue
+                {isLoading ? (
+                  <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+                ) : (
+                  'Continue'
+                )}
               </motion.button>
             ) : (
               <>
                 <motion.button
                   variants={buttonVariants}
-                  whileHover="hover"
-                  // whileTap="tap"
+                  whileHover={isLoading ? undefined : 'hover'}
                   onClick={handleLogin}
-                  className="w-full Button-Primary rounded-xl bg-(--color-primary-500) py-3 text-(--color-white) cursor-pointer"
+                  disabled={isLoading}
+                  className={`w-full flex items-center justify-center Button-Primary rounded-xl bg-(--color-primary-500) py-3 text-white ${isLoading ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
-                  Login
+                  {isLoading ? (
+                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+                  ) : (
+                    'Login'
+                  )}
                 </motion.button>
 
                 <motion.button
                   variants={buttonVariants}
-                  whileHover="hover"
-                  // whileTap="tap"
-                  onClick={() =>
-                    setStep(step === 'MOBILE' ? 'EMAIL' : 'MOBILE')
-                  }
-                  className="mt-4 Button-Primary w-full rounded-xl Button-Primary border border-(--color-primary-500) py-3 text-(--color-text-primary) cursor-pointer"
+                  whileHover={isLoading ? undefined : 'hover'}
+                  onClick={() => {
+                    setPhoneNumber('');
+                    setEmail('');
+                    setStep(step === 'MOBILE' ? 'EMAIL' : 'MOBILE');
+                  }}
+                  disabled={isLoading}
+                  className={`mt-4 Button-Primary w-full rounded-xl Button-Primary border border-(--color-primary-500) py-3 text-(--color-text-primary) ${isLoading ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   {step === 'MOBILE'
                     ? 'Login with email address'
@@ -423,6 +600,7 @@ const Login = () => {
 
 export default Login;
 
+// svg component for reusable icon
 const SvgIcon = ({
   src,
   className = '',

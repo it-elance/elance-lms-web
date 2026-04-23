@@ -1,18 +1,25 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 
 interface LogoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLogout: () => void;
+  onLogout: () => void | Promise<void>;
+  isLoading?: boolean;
 }
 
-const LogoutModal = ({ isOpen, onClose, onLogout }: LogoutModalProps) => {
+const LogoutModal = ({
+  isOpen,
+  onClose,
+  onLogout,
+  isLoading = false,
+}: LogoutModalProps) => {
   const [mounted, setMounted] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -23,10 +30,27 @@ const LogoutModal = ({ isOpen, onClose, onLogout }: LogoutModalProps) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      modalRef.current?.focus();
     } else {
       document.body.style.overflow = 'unset';
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && !isLoading) {
+        e.preventDefault();
+        onLogout();
+      } else if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isLoading, onLogout, onClose]);
 
   if (!mounted) return null;
 
@@ -45,11 +69,16 @@ const LogoutModal = ({ isOpen, onClose, onLogout }: LogoutModalProps) => {
 
           {/* Modal Content */}
           <motion.div
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="relative w-full max-w-85 bg-(--color-bg-secondary) rounded-2xl p-6 flex flex-col items-center text-center shadow-xl"
+            className="relative w-full max-w-85 bg-(--color-bg-secondary) rounded-2xl p-6 flex flex-col items-center text-center shadow-xl outline-none"
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Warning Icon */}
             <div className="flex items-center justify-center mb-5">
@@ -68,14 +97,20 @@ const LogoutModal = ({ isOpen, onClose, onLogout }: LogoutModalProps) => {
             <div className="flex flex-col gap-3 w-full">
               <button
                 onClick={onLogout}
-                className="w-full bg-(--color-error-600) text-white py-3.5 rounded-xl cursor-pointer Button-Primary"
+                disabled={isLoading}
+                className={`w-full flex items-center justify-center bg-(--color-error-600) text-white py-3.5 rounded-xl ${isLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'} Button-Primary`}
               >
-                Logout
+                {isLoading ? (
+                  <div className="h-5 w-5 border-2 border-(--color-primary) border-t-transparent rounded-full animate-spin mx-auto"></div>
+                ) : (
+                  'Logout'
+                )}
               </button>
 
               <button
                 onClick={onClose}
-                className="w-full border border-(--color-border-medium) text-(--color-text-primary) py-3.5 rounded-xl Button-Primary cursor-pointer"
+                disabled={isLoading}
+                className={`w-full border border-(--color-border-medium) text-(--color-text-primary) py-3.5 rounded-xl Button-Primary ${isLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 Cancel
               </button>

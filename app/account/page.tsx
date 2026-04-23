@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import LogoutModal from '../../components/LogoutModal';
+import toast from 'react-hot-toast';
+import LogoutModal from '../../components/modals/LogoutModal';
 
 const menuItems = [
   {
@@ -38,6 +39,7 @@ const menuItems = [
 
 const Account = () => {
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
 
   const handleItemClick = (item: (typeof menuItems)[0]) => {
@@ -48,8 +50,16 @@ const Account = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    localStorage.clear();
+    toast.success('Logged out successfully');
+
     setIsLogoutOpen(false);
+    setIsLoggingOut(false);
+
     router.push('/');
   };
 
@@ -118,8 +128,9 @@ const Account = () => {
 
       <LogoutModal
         isOpen={isLogoutOpen}
-        onClose={() => setIsLogoutOpen(false)}
+        onClose={() => !isLoggingOut && setIsLogoutOpen(false)}
         onLogout={handleLogout}
+        isLoading={isLoggingOut}
       />
     </>
   );
