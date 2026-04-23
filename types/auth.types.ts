@@ -1,8 +1,7 @@
-export type LoginType = 'phone' | 'email';
+export type SendOtpPayload =
+  | { type: 'phone'; phoneNumber: string }
+  | { type: 'email'; email: string };
 
-export interface LoginPayload {
-  type: LoginType;
-  email?: string;
-  phoneNumber?: string;
-  otp?: string;
-}
+export type VerifyOtpPayload =
+  | { type: 'phone'; phoneNumber: string; otp: string }
+  | { type: 'email'; email: string; otp: string };

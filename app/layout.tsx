@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import ThemeProvider from '@/components/ThemeProvider';
+import QueryProvider from '@/components/QueryProvider';
 import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
@@ -38,20 +39,22 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       </head>
 
       <body>
-        <ThemeProvider>
-          <Toaster
-            position="top-center"
-            toastOptions={{
-              style: {
-                background: 'var(--color-bg-secondary)',
-                color: 'var(--color-text-primary)',
-                border: '1px solid var(--color-border-medium)',
-              },
-            }}
-          />
+        <QueryProvider>
+          <ThemeProvider>
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                style: {
+                  background: 'var(--color-bg-secondary)',
+                  color: 'var(--color-text-primary)',
+                  border: '1px solid var(--color-border-medium)',
+                },
+              }}
+            />
 
-          <LayoutWrapper>{children}</LayoutWrapper>
-        </ThemeProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { loginApi, verifyOtpApi } from '@/services/api.service';
 import type { Variants } from 'framer-motion';
-import type { LoginPayload } from '@/types/auth.types';
+import type { SendOtpPayload, VerifyOtpPayload } from '@/types/auth.types';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 
@@ -114,7 +114,7 @@ const Login = () => {
     try {
       setIsLoading(true);
 
-      const payload: LoginPayload =
+      const payload: SendOtpPayload =
         step === 'EMAIL'
           ? { type: 'email', email }
           : { type: 'phone', phoneNumber: `+91${phoneNumber}` };
@@ -141,13 +141,14 @@ const Login = () => {
 
     try {
       setIsResending(true);
-      const payload: LoginPayload =
+      const payload: SendOtpPayload =
         previousStep === 'EMAIL'
           ? { type: 'email', email }
           : { type: 'phone', phoneNumber: `+91${phoneNumber}` };
 
       await loginApi(payload);
 
+      setOtp(['', '', '', '']);
       setSeconds(30);
       setCanResend(false);
 
@@ -165,7 +166,7 @@ const Login = () => {
     try {
       setIsLoading(true);
 
-      const payload: LoginPayload =
+      const payload: VerifyOtpPayload =
         previousStep === 'EMAIL'
           ? { type: 'email', email, otp: otp.join('') }
           : {
@@ -352,13 +353,21 @@ const Login = () => {
             >
               {step === 'MOBILE' && (
                 <>
-                  We will send confirmation code to your <br /> phone number
+                  We will send confirmation code to your <br /> mobile number
                 </>
               )}
+
               {step === 'EMAIL' &&
                 'We will send confirmation code to your email address'}
+
               {step === 'OTP' &&
-                'We will send confirmation code to your phone number'}
+                (previousStep === 'EMAIL' ? (
+                  'We sent a confirmation code to your email address'
+                ) : (
+                  <>
+                    We sent a confirmation code to your <br /> mobile number
+                  </>
+                ))}
             </motion.p>
 
             {/* form */}

@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import LogoutModal from '../../components/modals/LogoutModal';
+import { useHomeData } from '@/hooks/useHomeData';
+import { User } from 'lucide-react';
 
 const menuItems = [
   {
@@ -41,6 +43,10 @@ const Account = () => {
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
+  const { data, isLoading } = useHomeData();
+
+  const user = data?.user;
+  const selectedProgram = data?.selected_program;
 
   const handleItemClick = (item: (typeof menuItems)[0]) => {
     if (item.action === 'logout') {
@@ -73,24 +79,42 @@ const Account = () => {
           transition={{ duration: 0.5 }}
           className="flex flex-col items-center mb-5"
         >
-          <div className="w-20 h-20 rounded-full overflow-hidden mb-3 relative">
-            <Image
-              src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&auto=format&fit=crop&q=60"
-              alt="Leo Das"
-              className="w-full h-full object-cover"
-              fill
-            />
+          <div className="w-20 h-20 rounded-full overflow-hidden mb-3 relative bg-(--color-bg-tertiary) flex items-center justify-center">
+            {isLoading ? (
+              <div className="w-full h-full bg-(--color-bg-tertiary) animate-pulse rounded-full" />
+            ) : user?.profile_image_url ? (
+              <Image
+                src={user?.profile_image_url ?? ''}
+                alt={user?.full_name ?? ''}
+                className="w-full h-full object-cover"
+                fill
+              />
+            ) : (
+              <User className="w-10 h-10 text-(--color-text-disabled)" />
+            )}
           </div>
 
-          <h1 className="Heading-4 text-(--color-text-primary) mb-1">
-            Leo Das
-          </h1>
+          {isLoading ? (
+            <div className="animate-pulse space-y-2 flex flex-col items-center">
+              <div className="h-6 bg-(--color-bg-tertiary) rounded w-36" />
+              <div className="h-4 bg-(--color-bg-tertiary) rounded w-20" />
+              <div className="h-3 bg-(--color-bg-tertiary) rounded w-28" />
+            </div>
+          ) : (
+            <>
+              <h1 className="Heading-4 text-(--color-text-primary) mb-1">
+                {user?.full_name ?? '—'}
+              </h1>
 
-          <p className="text-(--color-primary-500) Body-Large">ACCA</p>
+              <p className="text-(--color-primary-500) Body-Large">
+                {selectedProgram?.name ?? '—'}
+              </p>
 
-          <p className="text-(--color-text-primary) Body-Extra-Small">
-            Student ID : EL25AA321
-          </p>
+              <p className="text-(--color-text-primary) Body-Extra-Small">
+                Student ID : {user?.student_id ?? '—'}
+              </p>
+            </>
+          )}
         </motion.div>
 
         {/* Menu Card */}
