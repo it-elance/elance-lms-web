@@ -6,6 +6,10 @@ import type {
   Subject,
   MyLearningPagination,
 } from '@/types/learning.types';
+import type {
+  AdmissionDetailsResponse,
+  AdmissionDetailsData,
+} from '@/types/admission.types';
 
 // Login API
 export const loginApi = async (body: SendOtpPayload) => {
@@ -50,4 +54,11 @@ export const switchProgramApi = async (programId: string) => {
     program_id: programId,
   });
   return response.data;
+};
+
+// Admission Details API
+export const admissionDetailsApi = async (): Promise<AdmissionDetailsData> => {
+  const response =
+    await apiClient.get<AdmissionDetailsResponse>('/admission/details');
+  return response.data.data;
 };

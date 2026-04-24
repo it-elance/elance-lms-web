@@ -15,6 +15,7 @@ export const useSwitchProgram = (currentSelectedId: string) => {
     onSuccess: () => {
       toast.success('Program switched successfully');
       queryClient.invalidateQueries({ queryKey: HOME_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['admission-details'] });
       router.push('/home');
     },
     onError: () => {
