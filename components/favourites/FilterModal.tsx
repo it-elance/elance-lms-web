@@ -124,7 +124,7 @@ const FilterModal = ({
 
           <button
             onClick={() => onApply(tempSelected)}
-            className="flex-1 py-2.5 Button-Small text-(--color-white) bg-(--color-primary-500) rounded-lg cursor-pointer"
+            className="flex-1 py-2.5 Button-Small text-white bg-(--color-primary-500) rounded-lg cursor-pointer"
           >
             Apply
           </button>
