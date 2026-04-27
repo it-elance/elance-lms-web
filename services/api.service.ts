@@ -17,6 +17,8 @@ import type {
 import type {
   LectureVideoData,
   LectureVideoResponse,
+  PaperDetailsData,
+  PaperDetailsResponse,
 } from '@/types/lecture.types';
 
 // Login API
@@ -90,6 +92,19 @@ export const lectureVideoApi = async (
     `/course/video-by-lecture`,
     {
       params: { lecture_id: lectureId },
+    }
+  );
+  return response.data.data.data;
+};
+
+// Paper Details API
+export const paperDetailsApi = async (
+  paperId: string
+): Promise<PaperDetailsData> => {
+  const response = await apiClient.get<PaperDetailsResponse>(
+    `/course/paper-details`,
+    {
+      params: { paper_id: paperId },
     }
   );
   return response.data.data.data;
