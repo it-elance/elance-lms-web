@@ -29,12 +29,12 @@ apiClient.interceptors.response.use(
   (error) => {
     const status = error?.response?.status;
 
-    if (status === 401) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('accessToken');
-        window.location.href = '/';
-      }
-    }
+    // if (status === 401) {
+    //   if (typeof window !== 'undefined') {
+    //     localStorage.removeItem('accessToken');
+    //     window.location.href = '/';
+    //   }
+    // }
 
     if (status === 500) {
       console.error('Server error');

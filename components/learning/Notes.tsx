@@ -1,91 +1,160 @@
-import React from 'react';
-import Image from 'next/image';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useNotes } from '@/hooks/useNotes';
+import type { Note } from '@/types/note.types';
+import Image from 'next/image';
+import DeleteNoteModal from '@/components/modals/DeleteNoteModal';
+import AddEditNoteModal from '@/components/modals/AddEditNoteModal';
 
-interface Note {
-  id: number;
-  timestamp: string;
-  content: string;
+interface NotesProps {
+  videoId: string;
 }
 
-const notes: Note[] = [
-  {
-    id: 1,
-    timestamp: '0:21',
-    content: 'Depreciation Formula Sheet',
-  },
-  {
-    id: 2,
-    timestamp: '0:21',
-    content: 'Depreciation Formula Sheet',
-  },
-  {
-    id: 3,
-    timestamp: '0:21',
-    content: 'Depreciation Formula Sheet',
-  },
-  {
-    id: 4,
-    timestamp: '0:21',
-    content: 'Depreciation Formula Sheet',
-  },
-];
+const Notes = ({ videoId }: NotesProps) => {
+  const { notes, isLoading, createNote, updateNote, deleteNote } =
+    useNotes(videoId);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newNote, setNewNote] = useState('');
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
-const Notes = () => {
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [newNote, setNewNote] = React.useState('Depreciation Formula Sheet');
+  const handleOpenModal = (note?: Note) => {
+    if (note) {
+      setEditingNote(note);
+      setNewNote(note.content);
+    } else {
+      setEditingNote(null);
+      setNewNote('');
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSave = () => {
+    if (!videoId || !newNote.trim()) return;
+
+    if (editingNote) {
+      updateNote.mutate({
+        _id: editingNote._id,
+        video_id: videoId,
+        time: editingNote.time,
+        content: newNote,
+      });
+    } else {
+      createNote.mutate({
+        video_id: videoId,
+        time: '0:00',
+        content: newNote,
+      });
+    }
+
+    setIsModalOpen(false);
+    setNewNote('');
+    setEditingNote(null);
+  };
+
+  const handleDeleteClick = (noteId: string) => {
+    setNoteToDelete(noteId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (noteToDelete) {
+      deleteNote.mutate({ _id: noteToDelete });
+      setIsDeleteModalOpen(false);
+      setNoteToDelete(null);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden relative">
       <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-24 scrollbar-hide">
         <div className="flex flex-col">
-          {notes.map((note) => (
-            <div
-              key={note.id}
-              className="group flex flex-col gap-3 p-4 border-b border-(--color-border-light) last:border-0"
-            >
-              <div className="flex items-start gap-3">
-                <span className="px-2.5 py-1 rounded-full bg-(--color-bg-tertiary) Overline text-(--color-text-primary)">
-                  {note.timestamp}
-                </span>
+          {isLoading ? (
+            <div className="flex flex-col">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="flex flex-col gap-3 p-4 border-b border-(--color-border-light) last:border-0 animate-pulse"
+                >
+                  {/* Timestamp pill + content */}
+                  <div className="flex items-start gap-3">
+                    <div className="h-6 w-12 rounded-full bg-(--color-bg-tertiary) shrink-0" />
 
-                <p className="Body-Small text-(--color-text-primary) pt-0.5">
-                  {note.content}
-                </p>
-              </div>
+                    <div className="flex-1 flex flex-col gap-2 pt-0.5">
+                      <div className="h-3.5 w-full rounded bg-(--color-bg-tertiary)" />
+                      <div className="h-3.5 w-4/5 rounded bg-(--color-bg-tertiary)" />
+                    </div>
+                  </div>
 
-              <div className="flex items-center gap-4 pl-14">
-                <button className="flex items-center gap-1.5 Caption text-(--color-primary-500) cursor-pointer">
-                  <Image
-                    src="/draw-pencil.svg"
-                    alt="Edit"
-                    width={14}
-                    height={14}
-                  />
-                  Edit
-                </button>
-
-                <button className="flex items-center gap-1.5 Caption text-(--color-error-600) cursor-pointer">
-                  <Image
-                    src="/delete.svg"
-                    alt="Delete"
-                    width={14}
-                    height={14}
-                  />
-                  Delete
-                </button>
-              </div>
+                  {/* Edit / Delete buttons */}
+                  <div className="flex items-center gap-4 pl-14">
+                    <div className="h-3 w-10 rounded bg-(--color-bg-tertiary)" />
+                    <div className="h-3 w-12 rounded bg-(--color-bg-tertiary)" />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          ) : notes.length === 0 ? (
+            <div className="flex justify-center p-4">
+              <span className="text-sm text-(--color-text-secondary)">
+                No notes yet. Add one!
+              </span>
+            </div>
+          ) : (
+            notes.map((note) => (
+              <div
+                key={note?._id}
+                className="group flex flex-col gap-3 p-4 border-b border-(--color-border-light) last:border-0"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="px-2.5 py-1 rounded-full bg-(--color-bg-tertiary) Overline text-(--color-text-primary)">
+                    {note?.time || '0:00'}
+                  </span>
+
+                  <p className="Body-Small text-(--color-text-primary) pt-0.5">
+                    {note?.content}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4 pl-14">
+                  <button
+                    onClick={() => handleOpenModal(note)}
+                    className="flex items-center gap-1.5 Caption text-(--color-primary-500) cursor-pointer"
+                  >
+                    <Image
+                      src="/draw-pencil.svg"
+                      alt="Edit"
+                      width={14}
+                      height={14}
+                    />
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteClick(note._id)}
+                    className="flex items-center gap-1.5 Caption text-(--color-error-600) cursor-pointer"
+                  >
+                    <Image
+                      src="/delete.svg"
+                      alt="Delete"
+                      width={14}
+                      height={14}
+                    />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Mobile Button (Fixed to Viewport) */}
+      {/* Mobile Button */}
       {createPortal(
         <div className="fixed bottom-16 left-0 right-0 z-50 p-4 lg:hidden">
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => handleOpenModal()}
             className="w-full py-3 px-4 bg-(--color-primary-500) text-white Button-Primary rounded-xl flex items-center justify-center gap-2 cursor-pointer"
           >
             Add New Note
@@ -94,81 +163,40 @@ const Notes = () => {
         document.body
       )}
 
-      {/* Desktop Button (Absolute to Column) */}
+      {/* Desktop Button */}
       <div className="hidden lg:block absolute bottom-0 left-0 right-0 p-4 z-10">
         <button
-          onClick={() => setIsModalOpen(true)}
-          className="w-full py-3 px-4 bg-(--color-primary-500) text-white Button-Primary rounded-xl flex items-center justify-center gap-2 cursor-pointer"
+          onClick={() => handleOpenModal()}
+          className="w-full py-2.5 px-3 bg-(--color-primary-500) text-white Button-Primary rounded-xl flex items-center justify-center gap-2 cursor-pointer"
         >
           Add New Note
         </button>
       </div>
 
-      {/* Add Note Modal Overlay */}
-      {/* Add Note Modal Overlay */}
-      {createPortal(
-        <AnimatePresence>
-          {isModalOpen && (
-            <div className="fixed inset-0 z-9999 flex items-center justify-center p-4">
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={(e) => {
-                  if (e.target === e.currentTarget) setIsModalOpen(false);
-                }}
-                className="absolute inset-0 bg-black/20"
-              />
+      {/* Add / Edit Note Modal */}
+      <AddEditNoteModal
+        isOpen={isModalOpen}
+        editingNote={editingNote}
+        noteContent={newNote}
+        isSaving={createNote.isPending || updateNote.isPending}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingNote(null);
+        }}
+        onContentChange={setNewNote}
+        onSave={handleSave}
+      />
 
-              {/* Modal Content */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ duration: 0.2 }}
-                className="relative bg-(--color-bg-primary) w-full max-w-sm p-6 rounded-xl shadow-lg border border-(--color-border) flex flex-col gap-6"
-              >
-                {/* Header/Timestamp */}
-                <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full bg-(--color-bg-tertiary) Overline text-(--color-text-primary)">
-                    0:21
-                  </span>
-
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="text-(--color-text-disabled) hover:text-(--color-text-primary) cursor-pointer"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                {/* Input Area */}
-                <textarea
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                  className="w-full text-base Body-Small text-(--color-text-primary) focus:outline-hidden resize-none bg-transparent"
-                  placeholder="Type your note here..."
-                  rows={3}
-                  autoFocus
-                />
-
-                {/* Save Button */}
-                <button
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    setNewNote('');
-                  }}
-                  className="w-full py-3 bg-(--color-primary-500) text-(--color-white) Button-Primary rounded-xl cursor-pointer"
-                >
-                  Save Note
-                </button>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+      {/* Delete Note Modal Overlay */}
+      <DeleteNoteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setNoteToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        isDeleting={deleteNote.isPending}
+      />
     </div>
   );
 };
