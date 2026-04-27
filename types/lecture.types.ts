@@ -39,3 +39,35 @@ export interface LectureVideoResponse {
     data: LectureVideoData;
   };
 }
+
+export interface PaperDetailsData {
+  paper_info: {
+    paper_title: string;
+    paper_code: string;
+    chapters_completed: number;
+    total_chapters: number;
+    last_updated: string;
+  };
+  statistics: {
+    total_paper_duration: string;
+    student_completion_rate: number;
+    materials_available: number;
+  };
+  instructors: {
+    name: string;
+    qualification: string;
+  }[];
+  meta: {
+    paper_id: string;
+    paper_name: string;
+    paper_code: string;
+  };
+}
+
+export interface PaperDetailsResponse {
+  status: string;
+  data: {
+    status: string;
+    data: PaperDetailsData;
+  };
+}
