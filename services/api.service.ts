@@ -7,6 +7,10 @@ import type {
   MyLearningPagination,
 } from '@/types/learning.types';
 import type {
+  LectureChapter,
+  LectureByPaperResponse,
+} from '@/types/lecture.types';
+import type {
   AdmissionDetailsResponse,
   AdmissionDetailsData,
 } from '@/types/admission.types';
@@ -60,5 +64,16 @@ export const switchProgramApi = async (programId: string) => {
 export const admissionDetailsApi = async (): Promise<AdmissionDetailsData> => {
   const response =
     await apiClient.get<AdmissionDetailsResponse>('/admission/details');
+  return response.data.data;
+};
+
+// Course Lecture By Paper API
+export const courseLecturesApi = async (
+  paperId: string
+): Promise<LectureChapter[]> => {
+  const response = await apiClient.get<LectureByPaperResponse>(
+    `/course/lecture-by-paper`,
+    { params: { paper_id: paperId } }
+  );
   return response.data.data;
 };

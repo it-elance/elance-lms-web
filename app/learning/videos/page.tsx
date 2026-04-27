@@ -4,102 +4,29 @@ import { useState } from 'react';
 import { ChevronLeft, Heart, Search, Check, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useCourseLectures } from '../../../hooks/useCourseLectures';
 import Image from 'next/image';
 import Overview from '../../../components/learning/Overview';
 import Materials from '../../../components/learning/Materials';
 import Notes from '../../../components/learning/Notes';
 
-interface Lesson {
-  id: number;
-  title: string;
-  duration: string;
-  completed: boolean;
-}
-
-interface Chapter {
-  id: number;
-  title: string;
-  lessons: Lesson[];
-  isOpen: boolean;
-}
-
 const Videos = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const paperId = searchParams.get('paper_id');
+
+  const { chapters, isLoading } = useCourseLectures(paperId || '');
+
   const [activeTab, setActiveTab] = useState('Lectures');
   const [searchQuery, setSearchQuery] = useState('');
-  const [chapters, setChapters] = useState<Chapter[]>([
-    {
-      id: 1,
-      title: 'Chapter 1 : Business Organization & Structure',
-      isOpen: false,
-      lessons: [],
-    },
-    {
-      id: 2,
-      title: 'Chapter 2 : Business Environment',
-      isOpen: true,
-      lessons: [
-        { id: 1, title: 'HR functions', duration: '9:47 min', completed: true },
-        {
-          id: 2,
-          title: 'Marketing functions',
-          duration: '9:47 min',
-          completed: true,
-        },
-        {
-          id: 3,
-          title: 'Operation functions',
-          duration: '9:47 min',
-          completed: false,
-        },
-        {
-          id: 4,
-          title: 'Finance functions',
-          duration: '9:47 min',
-          completed: false,
-        },
-      ],
-    },
-    {
-      id: 3,
-      title: 'Chapter 3 : Organizational Culture & Leadership',
-      isOpen: true,
-      lessons: [
-        {
-          id: 5,
-          title: 'HR functions',
-          duration: '9:47 min',
-          completed: true,
-        },
-        {
-          id: 6,
-          title: 'Marketing functions',
-          duration: '9:47 min',
-          completed: true,
-        },
-        {
-          id: 7,
-          title: 'Operation functions',
-          duration: '9:47 min',
-          completed: false,
-        },
-        {
-          id: 8,
-          title: 'Finance functions',
-          duration: '9:47 min',
-          completed: false,
-        },
-      ],
-    },
-  ]);
+  const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
 
-  const router = useRouter();
-
-  const toggleChapter = (id: number) => {
-    setChapters(
-      chapters.map((chapter) =>
-        chapter.id === id ? { ...chapter, isOpen: !chapter.isOpen } : chapter
-      )
-    );
+  const toggleChapter = (id: string) => {
+    setOpenChapters((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
   return (
@@ -222,128 +149,157 @@ const Videos = () => {
                 {/* Course Content List */}
                 <div className="flex-1 overflow-y-auto custom-scrollbar scrollbar-hide">
                   <div className="flex flex-col gap-3">
-                    {chapters.map((chapter) => (
-                      <div
-                        key={chapter.id}
-                        className="flex flex-col border-b border-(--color-border-light) pb-2 last:border-0"
-                      >
-                        <div
-                          className="flex justify-between items-start cursor-pointer group"
-                          onClick={() => toggleChapter(chapter.id)}
-                        >
-                          <div>
-                            <span className="Caption-Small text-(--color-text-tertiary) block mb-1">
-                              Chapter {chapter.id} :
-                            </span>
-
-                            <h3 className="Body-Small text-(--color-text-primary)">
-                              {chapter.title.split(' : ')[1]}
-                            </h3>
-                          </div>
-
-                          <div className="flex items-center gap-2 me-2.5">
-                            <span className="Caption text-(--color-primary-500) flex items-center gap-1 cursor-pointer">
-                              <svg
-                                width="15"
-                                height="15"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M14.1654 9.99967L9.9987 14.1663M9.9987 14.1663L5.83203 9.99967M9.9987 14.1663V3.33301M14.1654 16.6663H5.83203"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>{' '}
-                              Download All
-                            </span>
-
-                            {chapter.isOpen ? (
-                              <ChevronDown className="w-5 h-5 text-(--color-text-tertiary) transition-transform duration-300 rotate-180" />
-                            ) : (
-                              <ChevronDown className="w-5 h-5 text-(--color-text-tertiary) transition-transform duration-300" />
-                            )}
-                          </div>
-                        </div>
-
-                        <AnimatePresence initial={false}>
-                          {chapter.isOpen && (
-                            <motion.div
-                              key="content"
-                              initial="collapsed"
-                              animate="open"
-                              exit="collapsed"
-                              variants={{
-                                open: {
-                                  opacity: 1,
-                                  height: 'auto',
-                                  marginTop: 12,
-                                  transition: {
-                                    duration: 0.3,
-                                    ease: 'easeInOut',
-                                  },
-                                },
-                                collapsed: {
-                                  opacity: 0,
-                                  height: 0,
-                                  marginTop: 0,
-                                  transition: {
-                                    opacity: { duration: 0.15 },
-                                    height: {
-                                      duration: 0.3,
-                                      ease: 'easeInOut',
-                                    },
-                                    marginTop: {
-                                      duration: 0.3,
-                                      ease: 'easeInOut',
-                                    },
-                                  },
-                                },
-                              }}
-                              className="overflow-hidden"
+                    {isLoading ? (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-(--color-primary-500)"></div>
+                      </div>
+                    ) : (
+                      chapters.map((chapter) => {
+                        const isOpen = openChapters[chapter?.id];
+                        return (
+                          <div
+                            key={chapter?.id}
+                            className="flex flex-col border-b border-(--color-border-light) pb-2 last:border-0"
+                          >
+                            <div
+                              className="flex justify-between items-start cursor-pointer group"
+                              onClick={() => toggleChapter(chapter?.id)}
                             >
-                              <div className="flex flex-col gap-1 pl-0">
-                                {chapter.lessons.length > 0 ? (
-                                  chapter.lessons.map((lesson) => (
-                                    <div
-                                      key={lesson.id}
-                                      className="flex items-center justify-between p-2 cursor-pointer group border-b border-(--color-border-light) last:border-0"
-                                    >
-                                      <div>
-                                        <p className="Body-Small text-(--color-text-primary) mb-0.5">
-                                          {lesson.title}
-                                        </p>
+                              <div>
+                                <span className="Caption-Small text-(--color-text-tertiary) block mb-1">
+                                  Chapter : {chapter?.id}
+                                </span>
 
-                                        <p className="Caption-Small text-(--color-text-tertiary)">
-                                          {lesson.duration}
-                                        </p>
-                                      </div>
+                                <h3 className="Body-Small text-(--color-text-primary)">
+                                  {chapter?.title}
+                                </h3>
+                              </div>
 
-                                      <div className="w-6 h-6 flex items-center justify-center">
-                                        {lesson.completed ? (
-                                          <div className="w-6 h-6 rounded-full bg-(--color-success-600) flex items-center justify-center">
-                                            <Check className="w-3.5 h-3.5 text-white stroke-3" />
-                                          </div>
-                                        ) : (
-                                          <div className="w-6 h-6 rounded-full border-2 border-(--color-border-light)"></div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  ))
+                              <div className="flex items-center gap-2 me-2.5">
+                                <span className="Caption text-(--color-primary-500) flex items-center gap-1 cursor-pointer">
+                                  <svg
+                                    width="15"
+                                    height="15"
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M14.1654 9.99967L9.9987 14.1663M9.9987 14.1663L5.83203 9.99967M9.9987 14.1663V3.33301M14.1654 16.6663H5.83203"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>{' '}
+                                  Download All
+                                </span>
+
+                                {isOpen ? (
+                                  <ChevronDown className="w-5 h-5 text-(--color-text-tertiary) transition-transform duration-300 rotate-180" />
                                 ) : (
-                                  <div className="Caption-Small text-(--color-text-tertiary) italic">
-                                    No lessons available
-                                  </div>
+                                  <ChevronDown className="w-5 h-5 text-(--color-text-tertiary) transition-transform duration-300" />
                                 )}
                               </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    ))}
+                            </div>
+
+                            <AnimatePresence initial={false}>
+                              {isOpen && (
+                                <motion.div
+                                  key="content"
+                                  initial="collapsed"
+                                  animate="open"
+                                  exit="collapsed"
+                                  variants={{
+                                    open: {
+                                      opacity: 1,
+                                      height: 'auto',
+                                      marginTop: 12,
+                                      transition: {
+                                        duration: 0.3,
+                                        ease: 'easeInOut',
+                                      },
+                                    },
+                                    collapsed: {
+                                      opacity: 0,
+                                      height: 0,
+                                      marginTop: 0,
+                                      transition: {
+                                        opacity: { duration: 0.15 },
+                                        height: {
+                                          duration: 0.3,
+                                          ease: 'easeInOut',
+                                        },
+                                        marginTop: {
+                                          duration: 0.3,
+                                          ease: 'easeInOut',
+                                        },
+                                      },
+                                    },
+                                  }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="flex flex-col gap-1 pl-0">
+                                    {chapter?.lessons?.length > 0 ? (
+                                      chapter?.lessons.map((lesson) => (
+                                        <div
+                                          key={lesson?.id}
+                                          className="flex items-center justify-between p-2 cursor-pointer group border-b border-(--color-border-light) last:border-0"
+                                        >
+                                          <div>
+                                            <p className="Body-Small text-(--color-text-primary) mb-0.5">
+                                              {lesson?.title}
+                                            </p>
+
+                                            <p className="Caption-Small text-(--color-text-tertiary)">
+                                              {(() => {
+                                                const totalSeconds =
+                                                  Number(lesson?.duration) || 0;
+                                                const h = Math.floor(
+                                                  totalSeconds / 3600
+                                                );
+                                                const m = Math.floor(
+                                                  (totalSeconds % 3600) / 60
+                                                );
+                                                const s = Math.floor(
+                                                  totalSeconds % 60
+                                                );
+
+                                                const parts = [];
+                                                if (h > 0) parts.push(`${h}h`);
+                                                if (m > 0 || h > 0)
+                                                  parts.push(`${m}m`);
+                                                parts.push(`${s}s`);
+
+                                                return parts.join(' ');
+                                              })()}
+                                            </p>
+                                          </div>
+
+                                          <div className="w-6 h-6 flex items-center justify-center">
+                                            {lesson?.isCompleted ? (
+                                              <div className="w-6 h-6 rounded-full bg-(--color-success-600) flex items-center justify-center">
+                                                <Check className="w-3.5 h-3.5 text-white stroke-3" />
+                                              </div>
+                                            ) : (
+                                              <div className="w-6 h-6 rounded-full border-2 border-(--color-border-light)"></div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <div className="Caption-Small text-(--color-text-tertiary) italic">
+                                        No lessons available
+                                      </div>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </motion.div>
