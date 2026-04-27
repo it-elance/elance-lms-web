@@ -6,6 +6,8 @@ import { Play, ArrowRight, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useHomeData } from '@/hooks/useHomeData';
 
+const MotionLink = motion.create(Link);
+
 const CourseCardSkeleton = () => (
   <div className="min-w-[90%] sm:min-w-95 lg:min-w-[calc(33.333%-8px)] lg:w-[calc(33.333%-8px)] shrink-0 bg-(--color-bg-primary) border-[1.5px] border-(--color-border) rounded-xl p-2 animate-pulse">
     <div className="h-32 w-full rounded-md mb-2 bg-(--color-bg-tertiary)" />
@@ -159,8 +161,9 @@ const Home = () => {
                   </>
                 ) : (
                   myLearning.map((course, index) => (
-                    <motion.div
+                    <MotionLink
                       key={course?.subject_id}
+                      href={`/learning/videos?paper_id=${course?.subject_id}`}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{
@@ -168,7 +171,7 @@ const Home = () => {
                         ease: 'easeOut',
                         delay: index * 0.1,
                       }}
-                      className="min-w-[90%] sm:min-w-95 lg:min-w-[calc(33.333%-8px)] lg:w-[calc(33.333%-8px)] shrink-0 bg-(--color-bg-primary) border-[1.5px] border-(--color-border) rounded-xl p-2 relative"
+                      className="min-w-[90%] sm:min-w-95 lg:min-w-[calc(33.333%-8px)] lg:w-[calc(33.333%-8px)] shrink-0 bg-(--color-bg-primary) border-[1.5px] border-(--color-border) rounded-xl p-2 relative cursor-pointer"
                     >
                       <div className="relative h-32 w-full rounded-md mb-2 overflow-hidden flex items-center justify-center">
                         {course?.image_url ? (
@@ -242,7 +245,7 @@ const Home = () => {
                           </span>
                         </div>
                       </div>
-                    </motion.div>
+                    </MotionLink>
                   ))
                 )}
 
