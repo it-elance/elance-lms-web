@@ -1,11 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronLeft, Heart, Search, Check, ChevronDown } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import {
+  ChevronLeft,
+  Heart,
+  Search,
+  Check,
+  ChevronDown,
+  Play,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useCourseLectures } from '../../../hooks/useCourseLectures';
+import { useLectureVideo } from '../../../hooks/useLectureVideo';
 import Image from 'next/image';
 import Overview from '../../../components/learning/Overview';
 import Materials from '../../../components/learning/Materials';
@@ -21,6 +29,25 @@ const Videos = () => {
   const [activeTab, setActiveTab] = useState('Lectures');
   const [searchQuery, setSearchQuery] = useState('');
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
+  const [selectedLectureId, setSelectedLectureId] = useState<string | null>(
+    null
+  );
+
+  const activeLectureId = useMemo(() => {
+    if (selectedLectureId) return selectedLectureId;
+
+    if (chapters?.length > 0) {
+      for (const chapter of chapters) {
+        if (chapter?.lessons?.length > 0) {
+          return chapter.lessons[0].id;
+        }
+      }
+    }
+    return null;
+  }, [selectedLectureId, chapters]);
+
+  const { videoData, isLoading: isVideoLoading } =
+    useLectureVideo(activeLectureId);
 
   const toggleChapter = (id: string) => {
     setOpenChapters((prev) => ({
@@ -49,50 +76,122 @@ const Videos = () => {
         {/* Left Column: Video Player & Info */}
         <div className="w-full lg:w-1/2 flex flex-col gap-4 shrink-0 bg-(--color-bg-primary) lg:pb-0 max-h-[60vh] overflow-y-auto lg:overflow-visible lg:max-h-full lg:overflow-y-auto">
           {/* Video Player Container */}
-          <div className="relative aspect-video rounded-md overflow-hidden group">
-            <Image
-              src="/video.png"
-              alt="Video Player"
-              fill
-              className="object-cover"
-              priority
-              unoptimized
-            />
+          <div className="relative aspect-video rounded-md overflow-hidden group bg-black flex items-center justify-center cursor-pointer">
+            <AnimatePresence mode="wait">
+              {isVideoLoading ? (
+                <motion.div
+                  key="video-skeleton"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0 bg-(--color-bg-secondary) animate-pulse z-20"
+                ></motion.div>
+              ) : (
+                <motion.div
+                  key="video-content"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  {videoData?.thumbnail_url ? (
+                    <Image
+                      src={videoData?.thumbnail_url}
+                      alt="Video Player"
+                      fill
+                      className="object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                      priority
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-(--color-bg-secondary) flex items-center justify-center">
+                      <Play className="w-8 h-8 text-(--color-text-secondary)" />
+                    </div>
+                  )}
+
+                  <div className="absolute flex items-center justify-center w-16 h-16 bg-black/40 backdrop-blur-sm rounded-full group-hover:bg-black/50 transition-colors z-10 border border-white/20 shadow-lg">
+                    <Play className="w-8 h-8 text-white fill-white ml-1" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Video Info */}
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <h1 className="Body-Medium text-(--color-text-primary) mb-2">
-                Straight-line vs Reducing Balance Depreciation
-              </h1>
+          <AnimatePresence mode="wait">
+            {isVideoLoading ? (
+              <motion.div
+                key="info-skeleton"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.3 }}
+                className="flex justify-between items-start w-full"
+              >
+                <div className="flex-1 flex flex-col gap-3">
+                  <div className="h-6 w-3/4 bg-(--color-bg-secondary) animate-pulse rounded"></div>
 
-              <div className="flex items-center gap-2">
-                <span className="w-fit px-2 pt-0.5 Overline rounded border border-(--color-border-strong) text-(--color-text-secondary) uppercase bg-(--color-bg-secondary)">
-                  FA
-                </span>
+                  <div className="flex gap-2">
+                    <div className="h-5 w-16 bg-(--color-bg-secondary) animate-pulse rounded"></div>
+                    <div className="h-5 w-24 bg-(--color-bg-secondary) animate-pulse rounded"></div>
+                  </div>
+                </div>
 
-                <span className="Body-Extra-Small text-(--color-text-secondary)">
-                  Non-Current Assets & Depreciation
-                </span>
-              </div>
-            </div>
+                <div className="flex gap-3 mt-1">
+                  <div className="w-6 h-6 rounded-full bg-(--color-bg-secondary) animate-pulse"></div>
+                  <div className="w-6 h-6 rounded-full bg-(--color-bg-secondary) animate-pulse"></div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="info-content"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.3 }}
+                className="flex justify-between items-start w-full"
+              >
+                <div className="flex-1">
+                  <h1 className="Body-Medium text-(--color-text-primary) mb-2">
+                    {videoData?.topic_name}
+                  </h1>
 
-            <div className="flex">
-              <button className="pe-3 rounded-full text-(--color-text-secondary) cursor-pointer">
-                <Heart className="w-5 h-5" />
-              </button>
+                  <div className="flex items-center gap-2">
+                    <span className="w-fit px-2 pt-0.5 Overline rounded border border-(--color-border-strong) text-(--color-text-secondary) uppercase bg-(--color-bg-secondary)">
+                      {videoData?.paper_code}
+                    </span>
 
-              <button className="rounded-full text-(--color-text-secondary) cursor-pointer">
-                <Image
-                  src="/download.svg"
-                  alt="Download"
-                  width={20}
-                  height={20}
-                />
-              </button>
-            </div>
-          </div>
+                    <span className="Body-Extra-Small text-(--color-text-secondary)">
+                      {videoData?.chapter}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex">
+                  <button className="pe-3 rounded-full text-(--color-text-secondary) cursor-pointer">
+                    <Heart
+                      className={`w-5 h-5 ${
+                        videoData?.is_favourite
+                          ? 'fill-current text-red-500'
+                          : ''
+                      }`}
+                    />
+                  </button>
+
+                  <button className="rounded-full text-(--color-text-secondary) cursor-pointer">
+                    <Image
+                      src="/download.svg"
+                      alt="Download"
+                      width={20}
+                      height={20}
+                    />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Right Column: Tabs & Syllabus */}
@@ -150,12 +249,27 @@ const Videos = () => {
                 <div className="flex-1 overflow-y-auto custom-scrollbar scrollbar-hide">
                   <div className="flex flex-col gap-3">
                     {isLoading ? (
-                      <div className="flex justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-(--color-primary-500)"></div>
+                      <div className="flex flex-col gap-4 py-2">
+                        {[1, 2, 3].map((i) => (
+                          <div
+                            key={i}
+                            className="flex flex-col border-b border-(--color-border-light) pb-4 last:border-0 gap-2"
+                          >
+                            <div className="h-3 w-24 bg-(--color-bg-secondary) animate-pulse rounded"></div>
+
+                            <div className="flex justify-between items-center">
+                              <div className="h-5 w-48 bg-(--color-bg-secondary) animate-pulse rounded"></div>
+                              <div className="h-5 w-5 bg-(--color-bg-secondary) animate-pulse rounded"></div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      chapters.map((chapter) => {
-                        const isOpen = openChapters[chapter?.id];
+                      chapters.map((chapter, index) => {
+                        const isOpen =
+                          openChapters[chapter?.id] !== undefined
+                            ? openChapters[chapter?.id]
+                            : index === 0;
                         return (
                           <div
                             key={chapter?.id}
@@ -203,6 +317,7 @@ const Videos = () => {
                               </div>
                             </div>
 
+                            {/*Lessons */}
                             <AnimatePresence initial={false}>
                               {isOpen && (
                                 <motion.div
@@ -244,7 +359,14 @@ const Videos = () => {
                                       chapter?.lessons.map((lesson) => (
                                         <div
                                           key={lesson?.id}
-                                          className="flex items-center justify-between p-2 cursor-pointer group border-b border-(--color-border-light) last:border-0"
+                                          className={`flex items-center justify-between p-2 cursor-pointer group border-b border-(--color-border-light) last:border-0 ${
+                                            activeLectureId === lesson?.id
+                                              ? 'bg-(--color-bg-secondary)'
+                                              : ''
+                                          }`}
+                                          onClick={() =>
+                                            setSelectedLectureId(lesson?.id)
+                                          }
                                         >
                                           <div>
                                             <p className="Body-Small text-(--color-text-primary) mb-0.5">

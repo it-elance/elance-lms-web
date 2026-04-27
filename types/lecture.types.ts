@@ -20,3 +20,22 @@ export interface LectureByPaperResponse {
   status: string;
   data: LectureChapter[];
 }
+
+export interface LectureVideoData {
+  lecture_id: string;
+  access_token: string;
+  topic_name: string;
+  paper_code: string;
+  chapter: string;
+  is_favourite: boolean;
+  video_id: string;
+  thumbnail_url: string;
+}
+
+export interface LectureVideoResponse {
+  status: string;
+  data: {
+    status: string;
+    data: LectureVideoData;
+  };
+}
