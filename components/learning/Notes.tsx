@@ -98,7 +98,7 @@ const Notes = () => {
       <div className="hidden lg:block absolute bottom-0 left-0 right-0 p-4 z-10">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="w-full py-3 px-4 bg-(--color-primary-500) text-(--color-white) Button-Primary rounded-xl flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full py-3 px-4 bg-(--color-primary-500) text-white Button-Primary rounded-xl flex items-center justify-center gap-2 cursor-pointer"
         >
           Add New Note
         </button>
