@@ -20,6 +20,12 @@ import type {
   PaperDetailsData,
   PaperDetailsResponse,
 } from '@/types/lecture.types';
+import type {
+  Note,
+  CreateNotePayload,
+  UpdateNotePayload,
+  DeleteNotePayload,
+} from '@/types/note.types';
 
 // Login API
 export const loginApi = async (body: SendOtpPayload) => {
@@ -108,4 +114,30 @@ export const paperDetailsApi = async (
     }
   );
   return response.data.data.data;
+};
+
+// Notes API
+export const getNotesApi = async (videoId: string): Promise<Note[]> => {
+  const response = await apiClient.get<{ status: string; data: Note[] }>(
+    '/note',
+    {
+      params: { video_id: videoId },
+    }
+  );
+  return response.data.data;
+};
+
+export const createNoteApi = async (body: CreateNotePayload) => {
+  const response = await apiClient.post('/note', body);
+  return response.data;
+};
+
+export const updateNoteApi = async (body: UpdateNotePayload) => {
+  const response = await apiClient.put('/note', body);
+  return response.data;
+};
+
+export const deleteNoteApi = async (body: DeleteNotePayload) => {
+  const response = await apiClient.delete('/note', { data: body });
+  return response.data;
 };

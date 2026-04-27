@@ -462,7 +462,7 @@ const Videos = () => {
                 transition={{ duration: 0.2 }}
                 className="flex-1 overflow-y-auto custom-scrollbar"
               >
-                <Notes />
+                <Notes videoId={videoData?.video_id || ''} />
               </motion.div>
             )}
           </AnimatePresence>
