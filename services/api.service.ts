@@ -14,6 +14,10 @@ import type {
   AdmissionDetailsResponse,
   AdmissionDetailsData,
 } from '@/types/admission.types';
+import type {
+  LectureVideoData,
+  LectureVideoResponse,
+} from '@/types/lecture.types';
 
 // Login API
 export const loginApi = async (body: SendOtpPayload) => {
@@ -76,4 +80,17 @@ export const courseLecturesApi = async (
     { params: { paper_id: paperId } }
   );
   return response.data.data;
+};
+
+// Course Video By Lecture API
+export const lectureVideoApi = async (
+  lectureId: string
+): Promise<LectureVideoData> => {
+  const response = await apiClient.get<LectureVideoResponse>(
+    `/course/video-by-lecture`,
+    {
+      params: { lecture_id: lectureId },
+    }
+  );
+  return response.data.data.data;
 };
