@@ -26,6 +26,10 @@ import type {
   UpdateNotePayload,
   DeleteNotePayload,
 } from '@/types/note.types';
+import type {
+  AnalyticsApiResponse,
+  AnalyticsData,
+} from '@/types/analytics.types';
 
 // Login API
 export const loginApi = async (body: SendOtpPayload) => {
@@ -140,4 +144,10 @@ export const updateNoteApi = async (body: UpdateNotePayload) => {
 export const deleteNoteApi = async (body: DeleteNotePayload) => {
   const response = await apiClient.delete('/note', { data: body });
   return response.data;
+};
+
+// Analytics API
+export const getAnalyticsApi = async (): Promise<AnalyticsData> => {
+  const response = await apiClient.get<AnalyticsApiResponse>('/analytics');
+  return response.data.data;
 };
