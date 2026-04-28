@@ -3,10 +3,10 @@
 import { motion } from 'framer-motion';
 import { Play, ChevronLeft } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { useAnalyticsData } from '@/hooks/useAnalyticsData';
 import Image from 'next/image';
-
-const Analytics = () => {
+const AnalyticsContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const showHeader = searchParams.get('showHeader') === 'true';
@@ -391,6 +391,16 @@ const Analytics = () => {
         </div>
       )}
     </div>
+  );
+};
+
+const Analytics = () => {
+  return (
+    <Suspense
+      fallback={<div className="flex flex-col min-h-full w-full relative" />}
+    >
+      <AnalyticsContent />
+    </Suspense>
   );
 };
 
