@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import {
   ChevronLeft,
   Heart,
@@ -19,7 +19,7 @@ import Overview from '../../../components/learning/Overview';
 import Materials from '../../../components/learning/Materials';
 import Notes from '../../../components/learning/Notes';
 
-const Videos = () => {
+const VideosContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const paperId = searchParams.get('paper_id');
@@ -469,6 +469,18 @@ const Videos = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const Videos = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col h-[calc(100vh-6rem)] w-full relative" />
+      }
+    >
+      <VideosContent />
+    </Suspense>
   );
 };
 
