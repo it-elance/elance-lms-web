@@ -3,13 +3,17 @@
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
 const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
+  const router = useRouter();
   const [isLocked, setIsLocked] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const checkScreen = () => setIsLargeScreen(window.innerWidth >= 1024);
@@ -18,10 +22,43 @@ const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
     return () => window.removeEventListener('resize', checkScreen);
   }, []);
 
-  const isLoginPage = pathname === '/login' || pathname === '/';
+  const isLoginPage = pathname === '/' || pathname === '/login';
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const token = localStorage.getItem('accessToken');
+      const hasToken = Boolean(token);
+
+      setIsAuthenticated(hasToken);
+      setIsAuthReady(true);
+
+      if (!hasToken && !isLoginPage) {
+        router.replace('/');
+        return;
+      }
+
+      if (hasToken && isLoginPage) {
+        router.replace('/home');
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [isLoginPage, pathname, router]);
+
+  if (!isAuthReady) {
+    return null;
+  }
 
   if (isLoginPage) {
+    if (isAuthenticated) {
+      return null;
+    }
+
     return <>{children}</>;
+  }
+
+  if (!isAuthenticated) {
+    return null;
   }
 
   const isExpanded = isLocked;
