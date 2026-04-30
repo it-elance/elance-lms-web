@@ -196,21 +196,6 @@ const Favourites = () => {
       <div className="sticky top-0 z-20 bg-(--color-bg-primary) pb-2">
         {/* Desktop Header */}
         <div className="hidden lg:flex w-full bg-(--color-bg-primary) py-4 items-center justify-between">
-          {/* <div className="flex items-center gap-4 flex-1">
-            <motion.button
-              onClick={() => router.back()}
-              className="rounded-full transition-colors cursor-pointer p-1"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ChevronLeft className="w-6 h-6 text-(--color-text-primary)" />
-            </motion.button>
-          </div> */}
-
-          <h1 className="Heading-3 font-semibold text-(--color-text-primary) absolute left-1/2 -translate-x-1/2">
-            Favourites
-          </h1>
-
           <div className="flex-1 flex justify-end">
             <div className="flex items-center relative w-64 lg:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-(--color-text-primary)" />
@@ -236,20 +221,7 @@ const Favourites = () => {
 
         {/* Mobile Header */}
         <div className="lg:hidden w-full bg-(--color-bg-primary) py-4 flex flex-col gap-2">
-          <h1 className="Heading-3 font-semibold text-(--color-text-primary)">
-            Favourites
-          </h1>
-
           <div className="flex items-center gap-3">
-            {/* <motion.button
-              onClick={() => router.back()}
-              className="rounded-full transition-colors cursor-pointer hover:bg-(--color-bg-tertiary) p-1 shrink-0"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ChevronLeft className="w-6 h-6 text-(--color-text-primary)" />
-            </motion.button> */}
-
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-(--color-text-primary)" />
               <input

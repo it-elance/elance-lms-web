@@ -20,8 +20,8 @@ const Theme = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-full w-full relative">
-      <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none bg-(--color-bg-primary) py-4">
+    <div className="flex flex-col min-h-full w-full relative lg:justify-center">
+      <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none bg-(--color-bg-primary) py-4 lg:absolute lg:top-0 lg:left-0">
         <motion.button
           onClick={() => router.back()}
           className="rounded-full transition-colors pointer-events-auto cursor-pointer"
@@ -33,20 +33,9 @@ const Theme = () => {
         >
           <ChevronLeft className="w-6 h-6 text-(--color-text-primary)" />
         </motion.button>
-
-        <div className="flex items-center justify-center relative w-full">
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="Heading-3 text-(--color-text-primary)"
-          >
-            Theme Preferences
-          </motion.h1>
-        </div>
       </div>
 
-      <div className="w-full max-w-2xl mx-auto px-4 pb-6 mt-3">
+      <div className="w-full max-w-2xl mx-auto px-4 pb-6 mt-3 lg:mt-0">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
