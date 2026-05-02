@@ -32,7 +32,7 @@ const AnalyticsContent = () => {
       )}
 
       {isLoading || !data ? (
-        <div className="w-full max-w-7xl mx-auto pb-6 mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="w-full pb-6 mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Left Column Skeleton */}
           <div className="space-y-3">
             {/* Progress Card Skeleton */}
@@ -124,7 +124,7 @@ const AnalyticsContent = () => {
           </div>
         </div>
       ) : (
-        <div className="w-full max-w-7xl mx-auto pb-6 mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="w-full pb-6 mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
           <div className="space-y-3">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
