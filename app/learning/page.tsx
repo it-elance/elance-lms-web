@@ -29,21 +29,10 @@ const SkeletonCard = () => (
 );
 
 const Learning = () => {
-  const { subjects, pagination, isLoading, error, page, setPage } =
-    useMyLearning();
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 gap-3">
-        <p className="Body-Small text-(--color-text-secondary)">
-          Failed to load subjects. Please try again.
-        </p>
-      </div>
-    );
-  }
+  const { subjects, pagination, isLoading, page, setPage } = useMyLearning();
 
   return (
-    <div className="flex flex-col gap-4 mt-3">
+    <div className="flex flex-col gap-4 mt-3 h-full">
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {isLoading
@@ -200,10 +189,25 @@ const Learning = () => {
 
       {/* Empty state */}
       {!isLoading && subjects?.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 gap-2">
-          <p className="Body-Small text-(--color-text-secondary)">
-            No subjects found.
-          </p>
+        <div className="flex flex-col items-center justify-center flex-1 min-h-[60vh] gap-3">
+          <Image
+            src="/empty-papers.svg"
+            alt="No papers"
+            width={70}
+            height={70}
+            className="opacity-90"
+          />
+
+          <div className="flex flex-col items-center gap-1.5 mt-2">
+            <h3 className="Heading-4 text-(--color-text-primary)">
+              No Study Papers Yet
+            </h3>
+
+            <p className="Body-Small text-(--color-text-tertiary) text-center max-w-xs">
+              There are currently no papers assigned to your learning plan. New
+              papers will appear here once available.
+            </p>
+          </div>
         </div>
       )}
     </div>
