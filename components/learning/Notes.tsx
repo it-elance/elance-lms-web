@@ -68,8 +68,8 @@ const Notes = ({ videoId }: NotesProps) => {
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-      <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar pb-24 scrollbar-hide">
-        <div className="flex flex-col">
+      <div className="flex-1 flex flex-col overflow-y-auto pr-2 custom-scrollbar pb-24 scrollbar-hide">
+        <div className="flex flex-col flex-1 h-full">
           {isLoading ? (
             <div className="flex flex-col">
               {[1, 2, 3].map((i) => (
@@ -96,10 +96,24 @@ const Notes = ({ videoId }: NotesProps) => {
               ))}
             </div>
           ) : notes.length === 0 ? (
-            <div className="flex justify-center p-4">
-              <span className="text-sm text-(--color-text-secondary)">
-                No notes yet. Add one!
-              </span>
+            <div className="flex flex-col items-center justify-center flex-1 gap-3">
+              <Image
+                src="/empty-notes.svg"
+                alt="No notes"
+                width={60}
+                height={60}
+                className="opacity-90"
+              />
+
+              <div className="flex flex-col items-center gap-1.5 mt-2">
+                <h3 className="Heading-4 text-(--color-text-primary)">
+                  No Notes Yet
+                </h3>
+
+                <p className="Body-Small text-(--color-text-tertiary) text-center max-w-xs">
+                  Create notes while watching lessons to revise faster later.
+                </p>
+              </div>
             </div>
           ) : (
             notes.map((note) => (
