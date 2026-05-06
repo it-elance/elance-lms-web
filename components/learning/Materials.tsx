@@ -1,115 +1,218 @@
-import { useState } from 'react';
 import Image from 'next/image';
+import { useMaterials } from '@/hooks/useMaterials';
+import { useTheme } from '@/components/ThemeProvider';
+import type { Material } from '@/types/material.types';
 
-interface Material {
-  id: number;
-  title: string;
-  type: 'PDF' | 'PPT' | 'JPG' | 'DOCX' | 'XLS';
-  size: string;
+interface MaterialsProps {
+  lectureId: string | null | undefined;
 }
 
-const materials: Material[] = [
-  {
-    id: 1,
-    title: 'Depreciation Formula Sheet',
-    type: 'PDF',
-    size: '840 KB',
-  },
-  {
-    id: 2,
-    title: 'Understanding Different Types of Organizations',
-    type: 'PPT',
-    size: '840 KB',
-  },
-  {
-    id: 3,
-    title: 'Organizational Structures',
-    type: 'JPG',
-    size: '840 KB',
-  },
-  {
-    id: 4,
-    title: 'Understanding Different Types of Organizations',
-    type: 'DOCX',
-    size: '840 KB',
-  },
-  {
-    id: 5,
-    title: 'Types of organizations',
-    type: 'XLS',
-    size: '840 KB',
-  },
-];
+const FILE_TYPE_THUMBNAILS = ['pdf', 'ppt', 'xls', 'jpg', 'doc'] as const;
 
-const Materials = () => {
-  const [favorites, setFavorites] = useState<number[]>([]);
+const FILE_TYPE_MAP: Record<string, string> = {
+  docx: 'doc',
+  xlsx: 'xls',
+  pptx: 'ppt',
+};
 
-  const toggleFavorite = (id: number) => {
-    setFavorites((prev) =>
-      prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id]
+const getMaterialThumbnail = (
+  fileType?: string,
+  resolvedTheme?: 'light' | 'dark'
+) => {
+  const type = fileType?.split('/').pop()?.toLowerCase().trim();
+
+  const mappedType = type ? FILE_TYPE_MAP[type] || type : null;
+
+  const theme = resolvedTheme === 'dark' ? 'dark' : 'light';
+
+  const isSupported =
+    mappedType &&
+    FILE_TYPE_THUMBNAILS.includes(
+      mappedType as (typeof FILE_TYPE_THUMBNAILS)[number]
     );
-  };
+
+  if (!isSupported) {
+    return '/material.svg';
+  }
+
+  return `/${mappedType}-${theme}.svg`;
+};
+
+const Materials = ({ lectureId }: MaterialsProps) => {
+  const { materials, isLoading } = useMaterials(lectureId);
+
+  const { resolvedTheme } = useTheme();
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+        <div className="flex flex-col gap-4">
+          {/* Topic Materials skeleton */}
+          <div className="flex flex-col gap-2">
+            <div className="h-4 w-32 bg-(--color-bg-tertiary) rounded animate-pulse" />
+
+            {[1, 2].map((i) => (
+              <SkeletonCard key={`topic-${i}`} />
+            ))}
+          </div>
+
+          {/* Chapter Resources skeleton */}
+          <div className="flex flex-col gap-2">
+            <div className="h-4 w-36 bg-(--color-bg-tertiary) rounded animate-pulse" />
+
+            {[1, 2, 3].map((i) => (
+              <SkeletonCard key={`chapter-${i}`} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (materials.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <p className="Body-Small text-(--color-text-tertiary)">
+          No materials available for this lecture
+        </p>
+      </div>
+    );
+  }
+
+  const topicMaterials = materials.filter((m) => m.type === 'lecture');
+
+  const chapterMaterials = materials.filter((m) => m.type === 'chapter');
 
   return (
     <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-      <div className="flex flex-col gap-2">
-        {materials.map((material) => {
-          const isFavorite = favorites.includes(material.id);
-          return (
-            <div
-              key={material.id}
-              className="flex items-center justify-between p-2 rounded-xl border border-transparent bg-(--color-bg-secondary) cursor-pointer group"
-            >
-              <div className="flex items-center gap-3 overflow-hidden">
-                {/* Icon Container */}
-                <div className="flex items-center justify-center shrink-0">
-                  <Image
-                    src="/material.svg"
-                    alt="Material"
-                    width={90}
-                    height={90}
-                  />
-                </div>
+      <div className="flex flex-col gap-4">
+        {topicMaterials.length > 0 && (
+          <MaterialSection
+            title="Topic Materials"
+            materials={topicMaterials}
+            resolvedTheme={resolvedTheme}
+          />
+        )}
 
-                {/* Text Info */}
-                <div className="flex flex-col min-w-0">
-                  <h4 className="Body-Small text-(--color-text-primary) truncate pr-4">
-                    {material.title}
-                  </h4>
-
-                  <p className="Caption-Small text-(--color-text-tertiary) flex items-center gap-2 mt-2">
-                    <span>{material.type}</span>
-                    <span className="w-1 h-1 rounded-full bg-(--color-text-tertiary)"></span>
-                    <span>{material.size}</span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => toggleFavorite(material.id)}
-                  className={`cursor-pointer transition-colors ${
-                    isFavorite
-                      ? 'text-(--color-primary-500)'
-                      : 'text-(--color-text-tertiary)'
-                  }`}
-                >
-                  <SvgIcon
-                    src={isFavorite ? '/heart-filled.svg' : '/heart.svg'}
-                    className="w-5 h-5 bg-current"
-                  />
-                </button>
-              </div>
-            </div>
-          );
-        })}
+        {chapterMaterials.length > 0 && (
+          <MaterialSection
+            title="Chapter Resources"
+            materials={chapterMaterials}
+            resolvedTheme={resolvedTheme}
+          />
+        )}
       </div>
     </div>
   );
 };
 
 export default Materials;
+
+const MaterialSection = ({
+  title,
+  materials,
+  resolvedTheme,
+}: {
+  title: string;
+  materials: Material[];
+  resolvedTheme?: 'light' | 'dark';
+}) => (
+  <div className="flex flex-col gap-2">
+    <h3 className="Caption-Medium text-(--color-text-secondary)">{title}</h3>
+
+    {materials.map((material) => (
+      <MaterialCard
+        key={material?.material_id}
+        material={material}
+        resolvedTheme={resolvedTheme}
+      />
+    ))}
+  </div>
+);
+
+const MaterialCard = ({
+  material,
+  resolvedTheme,
+}: {
+  material: Material;
+  resolvedTheme?: 'light' | 'dark';
+}) => (
+  <a
+    href={material?.file_url}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label={`Open ${material?.title}`}
+    className="flex items-center justify-between p-2 rounded-xl bg-(--color-bg-secondary) cursor-pointer group hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
+  >
+    <div className="flex items-center gap-3 overflow-hidden">
+      {/* Icon */}
+      <div className="w-22 h-14 flex items-center justify-center shrink-0 rounded-md bg-(--color-bg-tertiary)">
+        <Image
+          src={getMaterialThumbnail(material?.file_type, resolvedTheme)}
+          alt={material?.file_type?.toUpperCase()}
+          width={25}
+          height={25}
+        />
+      </div>
+
+      {/* Text */}
+      <div className="flex flex-col min-w-0">
+        {/* title */}
+        <h4 className="Body-Small text-(--color-text-primary) truncate pr-4">
+          {material?.title}
+        </h4>
+
+        <p className="Caption-Small text-(--color-text-tertiary) flex items-center gap-2 mt-1.5">
+          {/* file type */}
+          <span>{material?.file_type?.toUpperCase()}</span>
+
+          <span className="w-1 h-1 rounded-full bg-(--color-text-tertiary)" />
+
+          {/* file size */}
+          <span>{material?.file_size}</span>
+        </p>
+      </div>
+    </div>
+
+    {/* Favourite */}
+    <div className="flex items-center gap-3 shrink-0">
+      <span
+        className={`transition-colors ${
+          material?.is_favourite
+            ? 'text-(--color-primary-500)'
+            : 'text-(--color-text-tertiary)'
+        }`}
+      >
+        <SvgIcon
+          src={material?.is_favourite ? '/heart-filled.svg' : '/heart.svg'}
+          className="w-5 h-5 bg-current"
+        />
+      </span>
+    </div>
+  </a>
+);
+
+const SkeletonCard = () => (
+  <div className="flex items-center justify-between p-2 rounded-xl bg-(--color-bg-secondary) animate-pulse">
+    <div className="flex items-center gap-3">
+      <div className="w-22.5 h-22.5 bg-(--color-bg-tertiary) rounded-md shrink-0" />
+
+      <div className="flex flex-col gap-2">
+        <div className="h-4 w-48 bg-(--color-bg-tertiary) rounded" />
+
+        <div className="flex items-center gap-2 mt-1">
+          <div className="h-3 w-10 bg-(--color-bg-tertiary) rounded" />
+
+          <div className="w-1 h-1 rounded-full bg-(--color-bg-tertiary)" />
+
+          <div className="h-3 w-14 bg-(--color-bg-tertiary) rounded" />
+        </div>
+      </div>
+    </div>
+
+    <div className="w-5 h-5 bg-(--color-bg-tertiary) rounded-full shrink-0" />
+  </div>
+);
 
 const SvgIcon = ({
   src,
