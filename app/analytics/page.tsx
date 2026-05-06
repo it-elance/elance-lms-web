@@ -355,37 +355,68 @@ const AnalyticsContent = () => {
               transition={{ duration: 0.4, delay: 0.2 }}
               className="border border-(--color-border-medium) rounded-xl overflow-hidden p-3"
             >
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 p-2 transition-colors bg-(--color-bg-secondary) rounded-xl cursor-pointer group"
-                  >
-                    <div className="relative w-22 h-14 rounded-md overflow-hidden bg-gray-200 shrink-0">
-                      <Image
-                        src={`https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&auto=format&fit=crop&q=60`}
-                        alt="Thumbnail"
-                        className="object-cover"
-                        fill
-                      />
+              {data?.recently_watched_videos &&
+              data?.recently_watched_videos?.length > 0 ? (
+                <div className="space-y-3">
+                  {data?.recently_watched_videos?.map((video, i) => {
+                    const watched = Number(video?.watched_seconds) || 0;
+                    const duration = video?.duration_seconds || 1;
+                    const durationMin = Math.floor(duration / 60);
+                    const durationSec = duration % 60;
+                    const durationLabel = `${durationMin}:${String(durationSec).padStart(2, '0')}`;
 
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
-                        <Play size={12} className="text-white fill-current" />
+                    return (
+                      <div
+                        key={video?.topic_id || i}
+                        className="flex items-center gap-3 p-2 transition-colors bg-(--color-bg-secondary) rounded-xl cursor-pointer group"
+                      >
+                        {/* Thumbnail */}
+                        <div className="relative w-22 h-14 rounded-md overflow-hidden bg-(--color-bg-tertiary) shrink-0">
+                          <Image
+                            src={video?.thumbnail_url}
+                            alt={video?.title}
+                            className="object-cover"
+                            fill
+                            unoptimized
+                          />
+
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+                            <Play
+                              size={12}
+                              className="text-white fill-current"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Title */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-(--color-text-primary) Body-Small truncate">
+                            {video?.title}
+                          </p>
+
+                          {/* watched time of the video */}
+                          <p className="text-(--color-text-tertiary) Caption mt-0.5">
+                            {`${Math.floor(watched / 60)}:${String(watched % 60).padStart(2, '0')} watched`}
+                          </p>
+                        </div>
+
+                        {/* Duration */}
+                        <span className="text-(--color-text-tertiary) Caption me-2 shrink-0">
+                          {durationLabel}
+                        </span>
                       </div>
-                    </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 gap-2">
+                  <Play size={28} className="text-(--color-text-disabled)" />
 
-                    <div className="flex-1 min-w-0">
-                      <p className="text-(--color-text-primary) Body-Small truncate">
-                        Understanding Different Types of...
-                      </p>
-                    </div>
-
-                    <span className="text-(--color-text-tertiary) Caption me-2">
-                      Preview
-                    </span>
-                  </div>
-                ))}
-              </div>
+                  <p className="text-(--color-text-tertiary) Body-Small">
+                    No recently watched videos
+                  </p>
+                </div>
+              )}
             </motion.div>
           </div>
         </div>

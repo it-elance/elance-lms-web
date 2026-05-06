@@ -33,11 +33,22 @@ export interface AnalyticsHighlights {
   completed_modules_this_month: number;
 }
 
+export interface RecentlyWatchedVideo {
+  paper_id: string;
+  chapter_id: string;
+  topic_id: string;
+  title: string;
+  thumbnail_url: string;
+  duration_seconds: number;
+  watched_seconds: number | string;
+}
+
 export interface AnalyticsData {
   course: AnalyticsCourse;
   overall_progress: AnalyticsOverallProgress;
   watch_time: AnalyticsWatchTime;
   weekly_activity?: AnalyticsWeeklyActivity[];
+  recently_watched_videos?: RecentlyWatchedVideo[];
   completion_summary: AnalyticsCompletionSummary;
   highlights: AnalyticsHighlights;
 }
