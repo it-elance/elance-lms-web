@@ -30,6 +30,10 @@ import type {
   AnalyticsApiResponse,
   AnalyticsData,
 } from '@/types/analytics.types';
+import type {
+  Material,
+  MaterialsByLectureResponse,
+} from '@/types/material.types';
 
 // Login API
 export const loginApi = async (body: SendOtpPayload) => {
@@ -149,5 +153,18 @@ export const deleteNoteApi = async (body: DeleteNotePayload) => {
 // Analytics API
 export const getAnalyticsApi = async (): Promise<AnalyticsData> => {
   const response = await apiClient.get<AnalyticsApiResponse>('/analytics');
+  return response.data.data;
+};
+
+// Materials By Lecture API
+export const materialsByLectureApi = async (
+  lectureId: string
+): Promise<Material[]> => {
+  const response = await apiClient.get<MaterialsByLectureResponse>(
+    '/course/material-by-lecture',
+    {
+      params: { lecture_id: lectureId },
+    }
+  );
   return response.data.data;
 };
