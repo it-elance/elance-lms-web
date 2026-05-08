@@ -281,7 +281,7 @@ const VideosContent = () => {
                             >
                               <div>
                                 <span className="Caption-Small text-(--color-text-tertiary) block mb-1">
-                                  Chapter : {chapter?.id}
+                                  Chapter {chapter?.order}:
                                 </span>
 
                                 <h3 className="Body-Small text-(--color-text-primary)">

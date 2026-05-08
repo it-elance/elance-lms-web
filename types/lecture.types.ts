@@ -11,6 +11,7 @@ export interface LectureLesson {
 
 export interface LectureChapter {
   id: string;
+  order: number;
   title: string;
   lessons: LectureLesson[];
   isOpen?: boolean;
