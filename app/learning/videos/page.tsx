@@ -189,7 +189,7 @@ const VideosContent = () => {
                 <div className="flex">
                   <button
                     aria-label="Favourite"
-                    className="pe-3 rounded-full text-(--color-text-secondary) cursor-pointer"
+                    className="rounded-full text-(--color-text-secondary) cursor-pointer"
                   >
                     <Heart
                       className={`w-5 h-5 ${
@@ -197,18 +197,6 @@ const VideosContent = () => {
                           ? 'fill-current text-red-500'
                           : ''
                       }`}
-                    />
-                  </button>
-
-                  <button
-                    aria-label="Download"
-                    className="rounded-full text-(--color-text-secondary) cursor-pointer"
-                  >
-                    <Image
-                      src="/download.svg"
-                      alt="Download"
-                      width={20}
-                      height={20}
                     />
                   </button>
                 </div>
@@ -313,25 +301,6 @@ const VideosContent = () => {
                               </div>
 
                               <div className="flex items-center gap-2 me-2.5">
-                                <span className="Caption text-(--color-primary-500) flex items-center gap-1 cursor-pointer">
-                                  <svg
-                                    width="15"
-                                    height="15"
-                                    viewBox="0 0 20 20"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      d="M14.1654 9.99967L9.9987 14.1663M9.9987 14.1663L5.83203 9.99967M9.9987 14.1663V3.33301M14.1654 16.6663H5.83203"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>{' '}
-                                  Download All
-                                </span>
-
                                 {isOpen ? (
                                   <ChevronDown className="w-5 h-5 text-(--color-text-tertiary) transition-transform duration-300 rotate-180" />
                                 ) : (
