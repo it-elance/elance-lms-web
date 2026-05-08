@@ -21,7 +21,7 @@ const Home = () => {
 
   const continueWatching = data?.continue_watching;
   const hasContinueWatching =
-    continueWatching?.lecture_id && continueWatching.lecture_id !== '';
+    continueWatching?.topic_id && continueWatching.topic_id !== '';
 
   const myLearning = data?.my_learning ?? [];
   const announcements = data?.announcements ?? [];
@@ -49,7 +49,10 @@ const Home = () => {
                 Continue Watching
               </h1>
 
-              <div className="bg-(--color-bg-primary) rounded-xl border-[1.5px] border-(--color-border) p-3">
+              <Link
+                href={`/learning/videos?paper_id=${continueWatching?.paper_id || ''}${continueWatching?.topic_id ? `&topic_id=${continueWatching.topic_id}` : ''}`}
+                className="bg-(--color-bg-primary) rounded-xl border-[1.5px] border-(--color-border) p-3 block"
+              >
                 {isLoading ? (
                   <div className="animate-pulse">
                     <div className="lg:h-64 h-42 w-full rounded-md bg-(--color-bg-tertiary)" />
@@ -75,13 +78,13 @@ const Home = () => {
 
                       {/* Resume Button */}
                       <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                        <button className="flex items-center gap-2 bg-white/20 text-white px-4 py-1.5 lg:px-6 lg:py-2 rounded-full transition-all border border-white/40 cursor-pointer">
+                        <div className="flex items-center gap-2 bg-white/20 text-white px-4 py-1.5 lg:px-6 lg:py-2 rounded-full transition-all border border-white/40 cursor-pointer">
                           <Play className="w-4 h-4 lg:w-5 lg:h-5" />
 
                           <span className="font-medium text-sm lg:text-base">
                             Resume
                           </span>
-                        </button>
+                        </div>
                       </div>
                     </div>
 
@@ -136,7 +139,7 @@ const Home = () => {
                     </div>
                   </>
                 )}
-              </div>
+              </Link>
             </motion.div>
           )}
 
