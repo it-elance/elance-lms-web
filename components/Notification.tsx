@@ -1,8 +1,10 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { ChevronLeft, Loader2 } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { useNotifications } from '@/hooks/useNotifications';
+import type { NotificationItem } from '@/types/notification.types';
 import Image from 'next/image';
 
 interface NotificationProps {
@@ -10,111 +12,135 @@ interface NotificationProps {
   onClose: () => void;
 }
 
-const notifications = [
-  {
-    id: 1,
-    title: 'Course content has been refreshed with the latest exam pattern.',
-    time: '32 min ago',
-    type: 'academics',
-    icon: '/school-noti.svg',
-    date: 'Today',
-  },
-  {
-    id: 2,
-    title: 'Course content has been refreshed with the latest exam pattern.',
-    time: '32 min ago',
-    type: 'general',
-    icon: '/mail-noti.svg',
-    date: 'Today',
-  },
-  {
-    id: 3,
-    title: 'Course content has been refreshed with the latest exam pattern.',
-    time: '32 min ago',
-    type: 'academics',
-    icon: '/bank-noti.svg',
-    date: 'Today',
-  },
-  {
-    id: 4,
-    title: 'Course content has been refreshed with the latest exam pattern.',
-    time: '32 min ago',
-    type: 'academics',
-    icon: '/book-noti.svg',
-    date: 'Yesterday',
-  },
-  {
-    id: 5,
-    title: 'Course content has been refreshed with the latest exam pattern.',
-    time: '32 min ago',
-    type: 'general',
-    icon: '/wallet-noti.svg',
-    date: 'Yesterday',
-  },
-  {
-    id: 6,
-    title: 'Course content has been refreshed with the latest exam pattern.',
-    time: '32 min ago',
-    type: 'general',
-    icon: '/announce-noti.svg',
-    date: 'Yesterday',
-  },
+const NOTIFICATION_ICONS: Record<string, string> = {
+  academics: '/school-noti.svg',
+  school: '/school-noti.svg',
+  general: '/mail-noti.svg',
+  mail: '/mail-noti.svg',
+  bank: '/bank-noti.svg',
+  book: '/book-noti.svg',
+  wallet: '/wallet-noti.svg',
+  announce: '/announce-noti.svg',
+};
+
+const FILTERS = [
+  { name: 'All', icon: '/filter.svg' },
+  { name: 'Academics', icon: '/school.svg' },
+  { name: 'General', icon: '/mail.svg' },
 ];
+
+const getNotificationIcon = (type: string) =>
+  NOTIFICATION_ICONS[type.toLowerCase()] || '/mail-noti.svg';
+
+const SvgIcon = ({
+  src,
+  className = '',
+}: {
+  src: string;
+  className?: string;
+}) => (
+  <div
+    className={className}
+    style={{
+      maskImage: `url(${src})`,
+      WebkitMaskImage: `url(${src})`,
+      maskSize: 'contain',
+      WebkitMaskSize: 'contain',
+      maskRepeat: 'no-repeat',
+      WebkitMaskRepeat: 'no-repeat',
+      maskPosition: 'center',
+      WebkitMaskPosition: 'center',
+      backgroundColor: 'currentColor',
+    }}
+  />
+);
+
+const NotificationCard = ({
+  notification,
+  isLast,
+  onRead,
+}: {
+  notification: NotificationItem;
+  isLast: boolean;
+  onRead: (id: string) => void;
+}) => {
+  const isUnread = notification?.status;
+
+  return (
+    <div
+      onClick={() => {
+        if (!isUnread) return;
+        onRead(notification?._id || '');
+      }}
+      className={`flex gap-4 group cursor-pointer ${
+        !isLast ? 'border-b border-(--color-border-light) pb-4' : ''
+      } ${!isUnread ? 'opacity-60' : ''}`}
+    >
+      {/* Icon */}
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200">
+        <Image
+          src={getNotificationIcon(notification?.type)}
+          alt={notification?.type}
+          width={20}
+          height={20}
+          className="w-7 h-7"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1">
+        <p className="Body-Small text-(--color-text-primary) mb-1 font-medium">
+          {notification?.title}
+        </p>
+
+        <p className="Caption-Small text-(--color-text-tertiary) mb-1">
+          {notification?.content}
+        </p>
+
+        {notification?.createdAt && (
+          <p className="Caption-Small text-(--color-text-tertiary)">
+            {new Date(notification?.createdAt).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </p>
+        )}
+      </div>
+
+      {/* Unread Dot */}
+      {isUnread && (
+        <div className="w-2 h-2 rounded-full bg-(--color-primary-500) mt-2 shrink-0" />
+      )}
+    </div>
+  );
+};
 
 const Notification = ({ isOpen, onClose }: NotificationProps) => {
   const [activeFilter, setActiveFilter] = useState('All');
 
-  const SvgIcon = ({
-    src,
-    className = '',
-  }: {
-    src: string;
-    className?: string;
-  }) => (
-    <div
-      className={className}
-      style={{
-        maskImage: `url(${src})`,
-        WebkitMaskImage: `url(${src})`,
-        maskSize: 'contain',
-        WebkitMaskSize: 'contain',
-        maskRepeat: 'no-repeat',
-        WebkitMaskRepeat: 'no-repeat',
-        maskPosition: 'center',
-        WebkitMaskPosition: 'center',
-        backgroundColor: 'currentColor',
-      }}
-    />
-  );
+  const {
+    notifications,
+    isLoading,
+    markAsRead,
+    markAllAsRead,
+    isMarkingAllAsRead,
+  } = useNotifications();
 
-  const filters = [
-    {
-      name: 'All',
-      icon: (props: { className?: string }) => (
-        <SvgIcon src="/filter.svg" {...props} />
-      ),
-    },
-    {
-      name: 'Academics',
-      icon: (props: { className?: string }) => (
-        <SvgIcon src="/school.svg" {...props} />
-      ),
-    },
-    {
-      name: 'General',
-      icon: (props: { className?: string }) => (
-        <SvgIcon src="/mail.svg" {...props} />
-      ),
-    },
-  ];
-
-  // Prevent body scroll when notification is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
+  const filteredNotifications = useMemo(() => {
+    if (activeFilter === 'All') {
+      return notifications;
     }
+
+    return notifications.filter(
+      (notification) =>
+        notification.type.toLowerCase() === activeFilter.toLowerCase()
+    );
+  }, [notifications, activeFilter]);
+
+  const hasNotifications = filteredNotifications.length > 0;
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : 'auto';
 
     return () => {
       document.body.style.overflow = 'auto';
@@ -127,7 +153,6 @@ const Notification = ({ isOpen, onClose }: NotificationProps) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            key="notification-backdrop"
             className="fixed inset-0 z-60"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -142,8 +167,7 @@ const Notification = ({ isOpen, onClose }: NotificationProps) => {
       <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
-            key="notification-drawer"
-            className="fixed shadow-sm top-16 md:top-22 right-0 md:right-4 h-[calc(100vh-64px)] md:h-150 w-full md:w-100 bg-(--color-bg-primary) z-70 md:rounded-xl flex flex-col border-l md:border border-(--color-border-light) overflow-hidden"
+            className="fixed shadow-sm top-16 md:top-22 right-0 md:right-4 h-[calc(100vh-64px)] md:h-180 w-full md:w-100 bg-(--color-bg-primary) z-70 md:rounded-xl flex flex-col border-l md:border border-(--color-border-light) overflow-hidden"
             initial={{ x: '100%' }}
             animate={{
               x: 0,
@@ -178,94 +202,98 @@ const Notification = ({ isOpen, onClose }: NotificationProps) => {
                   </h2>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <button className="Caption text-(--color-primary-500) hover:text-(--color-primary-600) transition-colors cursor-pointer">
-                    Mark as read
-                  </button>
-                </div>
+                <button
+                  onClick={() => markAllAsRead()}
+                  disabled={isMarkingAllAsRead || notifications.length === 0}
+                  className="Caption text-(--color-primary-500) hover:text-(--color-primary-600) transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                >
+                  Mark as read
+                </button>
               </div>
 
               {/* Filters */}
               <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide">
-                {filters.map((filter) => {
-                  const isActive = activeFilter === filter.name;
-                  const Icon = filter.icon;
+                {FILTERS.map((filter) => {
+                  const isActive = activeFilter === filter?.name;
+
                   return (
                     <button
-                      key={filter.name}
-                      onClick={() => setActiveFilter(filter.name)}
+                      key={filter?.name}
+                      onClick={() => setActiveFilter(filter?.name)}
                       className={`flex items-center gap-2 px-3 py-1 rounded-full Button-Small border whitespace-nowrap transition-all cursor-pointer ${
                         isActive
                           ? 'border-(--color-primary-500) text-(--color-primary-500)'
                           : 'border-(--color-border-medium) text-(--color-text-secondary)'
                       }`}
                     >
-                      <Icon
+                      <SvgIcon
+                        src={filter?.icon}
                         className={`w-4 h-4 ${
                           isActive
                             ? 'text-(--color-primary-500)'
                             : 'text-(--color-text-tertiary)'
                         }`}
                       />
-                      {filter.name}
+
+                      {filter?.name}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* List */}
-            <div className="flex-1 overflow-y-auto px-4">
-              {['Today', 'Yesterday'].map((dateGroup) => {
-                const groupNotifications = notifications.filter(
-                  (n) => n.date === dateGroup
-                );
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto px-4 flex flex-col">
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center flex-1 gap-3">
+                  <Loader2 className="w-8 h-8 animate-spin text-(--color-primary-500)" />
 
-                if (groupNotifications.length === 0) return null;
+                  <p className="Body-Small text-(--color-text-tertiary)">
+                    Loading notifications...
+                  </p>
+                </div>
+              ) : !hasNotifications ? (
+                <div className="flex flex-col items-center justify-center flex-1 gap-3">
+                  <Image
+                    src="/empty-notifications.svg"
+                    alt="No notifications"
+                    width={90}
+                    height={90}
+                    className="opacity-90"
+                  />
 
-                return (
-                  <div key={dateGroup} className="mb-6">
-                    <h3 className="Body-Extra-Small text-(--color-text-tertiary) mb-4">
-                      {dateGroup}
+                  <div className="flex flex-col items-center gap-1.5 mt-2">
+                    <h3 className="Heading-4 text-(--color-text-primary)">
+                      No Notifications Yet
                     </h3>
 
-                    <div className="space-y-6">
-                      {groupNotifications.map((notification, index) => (
-                        <div
-                          key={notification.id}
-                          className={`flex gap-4 group cursor-pointer ${
-                            index !== groupNotifications.length - 1
-                              ? 'border-b border-(--color-border-light) pb-4'
-                              : ''
-                          }`}
-                        >
-                          <div
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200`}
-                          >
-                            <Image
-                              src={notification.icon}
-                              alt={notification.type}
-                              width={20}
-                              height={20}
-                              className="w-7 h-7"
-                            />
-                          </div>
-
-                          <div>
-                            <p className="Body-Small text-(--color-text-primary) mb-1">
-                              {notification.title}
-                            </p>
-
-                            <p className="Caption-Small text-(--color-text-tertiary)">
-                              {notification.time}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <p className="Body-Small text-(--color-text-tertiary) text-center max-w-xs">
+                      Important announcements and reminders will show up here.
+                    </p>
                   </div>
-                );
-              })}
+                </div>
+              ) : (
+                <div className="mb-6">
+                  <h3 className="Body-Extra-Small text-(--color-text-tertiary) mb-4">
+                    Recent
+                  </h3>
+
+                  <div className="space-y-6">
+                    {filteredNotifications.map((notification, index) => (
+                      <NotificationCard
+                        key={notification?._id}
+                        notification={notification}
+                        isLast={index === filteredNotifications.length - 1}
+                        onRead={(id) =>
+                          markAsRead({
+                            notification_id: id,
+                          })
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

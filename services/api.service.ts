@@ -34,6 +34,11 @@ import type {
   Material,
   MaterialsByLectureResponse,
 } from '@/types/material.types';
+import type {
+  NotificationItem,
+  NotificationResponse,
+  ReadNotificationPayload,
+} from '@/types/notification.types';
 
 // Login API
 export const loginApi = async (body: SendOtpPayload) => {
@@ -167,4 +172,20 @@ export const materialsByLectureApi = async (
     }
   );
   return response.data.data;
+};
+
+// Notification APIs
+export const getNotificationsApi = async (): Promise<NotificationItem[]> => {
+  const response = await apiClient.get<NotificationResponse>('/notification');
+  return response.data.notification;
+};
+
+export const readNotificationApi = async (body: ReadNotificationPayload) => {
+  const response = await apiClient.post('/notification/read', body);
+  return response.data;
+};
+
+export const readAllNotificationsApi = async () => {
+  const response = await apiClient.post('/notification/read/all', {});
+  return response.data;
 };
