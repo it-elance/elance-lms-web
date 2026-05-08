@@ -40,6 +40,7 @@ import type {
   ReadNotificationPayload,
 } from '@/types/notification.types';
 import type { FavouritePayload } from '@/types/favourite.types';
+import type { PaperResponse, ChapterResponse } from '@/types/paper.types';
 
 // Login API
 export const loginApi = async (body: SendOtpPayload) => {
@@ -188,6 +189,21 @@ export const readNotificationApi = async (body: ReadNotificationPayload) => {
 
 export const readAllNotificationsApi = async () => {
   const response = await apiClient.post('/notification/read/all', {});
+  return response.data;
+};
+
+// Paper & Chapter APIs
+export const getPapersApi = async (): Promise<PaperResponse> => {
+  const response = await apiClient.get<PaperResponse>('/paper');
+  return response.data;
+};
+
+export const getChaptersApi = async (
+  paperId: string
+): Promise<ChapterResponse> => {
+  const response = await apiClient.get<ChapterResponse>('/chapter', {
+    params: { paper_id: paperId },
+  });
   return response.data;
 };
 
