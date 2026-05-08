@@ -30,7 +30,10 @@ export interface AvailableProgram {
 }
 
 export interface ContinueWatching {
-  lecture_id: string;
+  paper_id?: string;
+  subject_id?: string;
+  chapter_id?: string;
+  topic_id?: string;
   title: string;
   subject: string;
   paper_code: string;
@@ -38,6 +41,7 @@ export interface ContinueWatching {
   last_watched_label: string;
   progress_percent?: number;
   remaining_time_label: number | null;
+  watched_seconds?: string;
 }
 
 export interface MyLearningItem {

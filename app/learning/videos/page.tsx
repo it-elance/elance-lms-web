@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import {
   ChevronLeft,
   Heart,
@@ -23,28 +23,45 @@ const VideosContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const paperId = searchParams.get('paper_id');
+  const topicId = searchParams.get('topic_id');
 
   const { chapters, isLoading } = useCourseLectures(paperId || '');
 
   const [activeTab, setActiveTab] = useState('Lectures');
   const [searchQuery, setSearchQuery] = useState('');
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
-  const [selectedLectureId, setSelectedLectureId] = useState<string | null>(
-    null
-  );
+  const [activeLectureId, setActiveLectureId] = useState<string | null>(null);
 
-  const activeLectureId = useMemo(() => {
-    if (selectedLectureId) return selectedLectureId;
+  useEffect(() => {
+    if (isLoading || !chapters.length) return;
 
-    if (chapters?.length > 0) {
-      for (const chapter of chapters) {
-        if (chapter?.lessons?.length > 0) {
-          return chapter.lessons[0].id;
-        }
-      }
+    const selectedLesson = chapters
+      .flatMap((chapter) => chapter.lessons || [])
+      .find((lesson) => lesson.id === topicId || lesson.video_id === topicId);
+
+    const lectureId = selectedLesson?.id || chapters[0]?.lessons?.[0]?.id;
+
+    if (lectureId && lectureId !== activeLectureId) {
+      setActiveLectureId(lectureId);
     }
-    return null;
-  }, [selectedLectureId, chapters]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, chapters, topicId]);
+
+  useEffect(() => {
+    if (!chapters.length || !activeLectureId) return;
+
+    const currentChapter = chapters.find((chapter) =>
+      chapter.lessons?.some((lesson) => lesson.id === activeLectureId)
+    );
+
+    if (currentChapter && !openChapters[currentChapter.id]) {
+      setOpenChapters((prev) => ({
+        ...prev,
+        [currentChapter.id]: true,
+      }));
+    }
+  }, [chapters, activeLectureId, openChapters]);
 
   const { videoData, isLoading: isVideoLoading } =
     useLectureVideo(activeLectureId);
@@ -170,7 +187,10 @@ const VideosContent = () => {
                 </div>
 
                 <div className="flex">
-                  <button className="pe-3 rounded-full text-(--color-text-secondary) cursor-pointer">
+                  <button
+                    aria-label="Favourite"
+                    className="pe-3 rounded-full text-(--color-text-secondary) cursor-pointer"
+                  >
                     <Heart
                       className={`w-5 h-5 ${
                         videoData?.is_favourite
@@ -180,7 +200,10 @@ const VideosContent = () => {
                     />
                   </button>
 
-                  <button className="rounded-full text-(--color-text-secondary) cursor-pointer">
+                  <button
+                    aria-label="Download"
+                    className="rounded-full text-(--color-text-secondary) cursor-pointer"
+                  >
                     <Image
                       src="/download.svg"
                       alt="Download"
@@ -365,7 +388,7 @@ const VideosContent = () => {
                                               : ''
                                           }`}
                                           onClick={() =>
-                                            setSelectedLectureId(lesson?.id)
+                                            setActiveLectureId(lesson?.id)
                                           }
                                         >
                                           <div>
