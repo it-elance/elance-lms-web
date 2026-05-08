@@ -1,13 +1,16 @@
 import Image from 'next/image';
+import { useMemo } from 'react';
 import { useMaterials } from '@/hooks/useMaterials';
+import { useFavourite } from '@/hooks/useFavourite';
 import { useTheme } from '@/components/ThemeProvider';
+import type { FavouritePayload } from '@/types/favourite.types';
 import type { Material } from '@/types/material.types';
 
 interface MaterialsProps {
   lectureId: string | null | undefined;
 }
 
-const FILE_TYPE_THUMBNAILS = ['pdf', 'ppt', 'xls', 'jpg', 'doc'] as const;
+const FILE_TYPE_THUMBNAILS = ['pdf', 'ppt', 'xls', 'jpg', 'doc'];
 
 const FILE_TYPE_MAP: Record<string, string> = {
   docx: 'doc',
@@ -25,11 +28,7 @@ const getMaterialThumbnail = (
 
   const theme = resolvedTheme === 'dark' ? 'dark' : 'light';
 
-  const isSupported =
-    mappedType &&
-    FILE_TYPE_THUMBNAILS.includes(
-      mappedType as (typeof FILE_TYPE_THUMBNAILS)[number]
-    );
+  const isSupported = mappedType && FILE_TYPE_THUMBNAILS.includes(mappedType);
 
   if (!isSupported) {
     return '/material.svg';
@@ -40,8 +39,19 @@ const getMaterialThumbnail = (
 
 const Materials = ({ lectureId }: MaterialsProps) => {
   const { materials, isLoading } = useMaterials(lectureId);
+  const { toggleFavourite, isTogglingFavourite } = useFavourite();
 
   const { resolvedTheme } = useTheme();
+
+  const topicMaterials = useMemo(
+    () => materials.filter((material) => material.type === 'lecture'),
+    [materials]
+  );
+
+  const chapterMaterials = useMemo(
+    () => materials.filter((material) => material.type === 'chapter'),
+    [materials]
+  );
 
   if (isLoading) {
     return (
@@ -94,10 +104,6 @@ const Materials = ({ lectureId }: MaterialsProps) => {
     );
   }
 
-  const topicMaterials = materials.filter((m) => m.type === 'lecture');
-
-  const chapterMaterials = materials.filter((m) => m.type === 'chapter');
-
   return (
     <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
       <div className="flex flex-col gap-4">
@@ -106,6 +112,9 @@ const Materials = ({ lectureId }: MaterialsProps) => {
             title="Topic Materials"
             materials={topicMaterials}
             resolvedTheme={resolvedTheme}
+            lectureId={lectureId}
+            isTogglingFavourite={isTogglingFavourite}
+            onToggleFavourite={toggleFavourite}
           />
         )}
 
@@ -114,6 +123,9 @@ const Materials = ({ lectureId }: MaterialsProps) => {
             title="Chapter Resources"
             materials={chapterMaterials}
             resolvedTheme={resolvedTheme}
+            lectureId={lectureId}
+            isTogglingFavourite={isTogglingFavourite}
+            onToggleFavourite={toggleFavourite}
           />
         )}
       </div>
@@ -123,23 +135,38 @@ const Materials = ({ lectureId }: MaterialsProps) => {
 
 export default Materials;
 
+type ToggleFavouriteHandler = (
+  payload: FavouritePayload & {
+    lectureId?: string | null;
+  }
+) => void;
+
 const MaterialSection = ({
   title,
   materials,
   resolvedTheme,
+  lectureId,
+  isTogglingFavourite,
+  onToggleFavourite,
 }: {
   title: string;
   materials: Material[];
   resolvedTheme?: 'light' | 'dark';
+  lectureId: string | null | undefined;
+  isTogglingFavourite: boolean;
+  onToggleFavourite: ToggleFavouriteHandler;
 }) => (
   <div className="flex flex-col gap-2">
     <h3 className="Caption-Medium text-(--color-text-secondary)">{title}</h3>
 
     {materials.map((material) => (
       <MaterialCard
-        key={material?.material_id}
+        key={material.material_id}
         material={material}
         resolvedTheme={resolvedTheme}
+        lectureId={lectureId}
+        isTogglingFavourite={isTogglingFavourite}
+        onToggleFavourite={onToggleFavourite}
       />
     ))}
   </div>
@@ -148,9 +175,15 @@ const MaterialSection = ({
 const MaterialCard = ({
   material,
   resolvedTheme,
+  lectureId,
+  isTogglingFavourite,
+  onToggleFavourite,
 }: {
   material: Material;
   resolvedTheme?: 'light' | 'dark';
+  lectureId: string | null | undefined;
+  isTogglingFavourite: boolean;
+  onToggleFavourite: ToggleFavouriteHandler;
 }) => (
   <a
     href={material?.file_url}
@@ -191,18 +224,36 @@ const MaterialCard = ({
 
     {/* Favourite */}
     <div className="flex items-center gap-3 shrink-0">
-      <span
-        className={`transition-colors ${
+      <button
+        type="button"
+        aria-label={
+          material?.is_favourite
+            ? 'Remove from favourites'
+            : 'Add to favourites'
+        }
+        disabled={isTogglingFavourite}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          onToggleFavourite({
+            entity_type: 'material',
+            entity_id: material?.material_id,
+            is_favourite: !material?.is_favourite,
+            lectureId,
+          });
+        }}
+        className={`cursor-pointer transition-colors ${
           material?.is_favourite
             ? 'text-(--color-primary-500)'
             : 'text-(--color-text-tertiary)'
-        }`}
+        } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         <SvgIcon
           src={material?.is_favourite ? '/heart-filled.svg' : '/heart.svg'}
           className="w-5 h-5 bg-current"
         />
-      </span>
+      </button>
     </div>
   </a>
 );
@@ -247,6 +298,7 @@ const SvgIcon = ({
       WebkitMaskRepeat: 'no-repeat',
       maskPosition: 'center',
       WebkitMaskPosition: 'center',
+      backgroundColor: 'currentColor',
     }}
   />
 );

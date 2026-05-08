@@ -39,6 +39,7 @@ import type {
   NotificationResponse,
   ReadNotificationPayload,
 } from '@/types/notification.types';
+import type { FavouritePayload } from '@/types/favourite.types';
 
 // Login API
 export const loginApi = async (body: SendOtpPayload) => {
@@ -188,4 +189,9 @@ export const readNotificationApi = async (body: ReadNotificationPayload) => {
 export const readAllNotificationsApi = async () => {
   const response = await apiClient.post('/notification/read/all', {});
   return response.data;
+};
+
+// Favourite API
+export const favouriteApi = async (body: FavouritePayload): Promise<void> => {
+  await apiClient.post('/favourite', body);
 };

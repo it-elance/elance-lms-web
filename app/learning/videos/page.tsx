@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useCourseLectures } from '../../../hooks/useCourseLectures';
 import { useLectureVideo } from '../../../hooks/useLectureVideo';
+import { useFavourite } from '@/hooks/useFavourite';
 import Image from 'next/image';
 import Overview from '../../../components/learning/Overview';
 import Materials from '../../../components/learning/Materials';
@@ -65,6 +66,7 @@ const VideosContent = () => {
 
   const { videoData, isLoading: isVideoLoading } =
     useLectureVideo(activeLectureId);
+  const { toggleFavourite, isTogglingFavourite } = useFavourite();
 
   const toggleChapter = (id: string) => {
     setOpenChapters((prev) => ({
@@ -188,14 +190,30 @@ const VideosContent = () => {
 
                 <div className="flex">
                   <button
-                    aria-label="Favourite"
-                    className="rounded-full text-(--color-text-secondary) cursor-pointer"
+                    aria-label={
+                      videoData?.is_favourite
+                        ? 'Remove from favourites'
+                        : 'Add to favourites'
+                    }
+                    disabled={!videoData?.lecture_id || isTogglingFavourite}
+                    onClick={() => {
+                      if (!videoData?.lecture_id) return;
+
+                      toggleFavourite({
+                        entity_type: 'lecture',
+                        entity_id: videoData?.lecture_id,
+                        is_favourite: !videoData?.is_favourite,
+                      });
+                    }}
+                    className={`rounded-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                      videoData?.is_favourite
+                        ? 'text-(--color-primary-500)'
+                        : 'text-(--color-text-tertiary)'
+                    }`}
                   >
                     <Heart
                       className={`w-5 h-5 ${
-                        videoData?.is_favourite
-                          ? 'fill-current text-red-500'
-                          : ''
+                        videoData?.is_favourite ? 'fill-current' : ''
                       }`}
                     />
                   </button>
