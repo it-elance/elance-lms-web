@@ -8,6 +8,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import Image from 'next/image';
 import Link from 'next/link';
 import NotificationPanel from './Notification';
+import { useNotifications } from '@/hooks/useNotifications';
 
 const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -15,6 +16,9 @@ const Header = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const { resolvedTheme } = useTheme();
+  const { notifications } = useNotifications();
+
+  const unreadCount = notifications.filter((n) => n.status).length;
 
   const router = useRouter();
 
@@ -217,6 +221,10 @@ const Header = () => {
               height={24}
               className="w-5 h-5 md:w-6 md:h-6"
             />
+
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 md:top-2 md:right-2 w-2 h-2 md:w-2.5 md:h-2.5 bg-(--color-primary-500) rounded-full border-2 border-(--color-bg-primary)" />
+            )}
           </motion.button>
         </div>
       </motion.header>

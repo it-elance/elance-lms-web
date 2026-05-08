@@ -6,6 +6,16 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { useAnalyticsData } from '@/hooks/useAnalyticsData';
 import Image from 'next/image';
+
+const formatTime = (seconds: number) => {
+  const totalSeconds = Math.max(0, Math.floor(seconds));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const remainingSeconds = totalSeconds % 60;
+
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+};
+
 const AnalyticsContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -361,9 +371,7 @@ const AnalyticsContent = () => {
                   {data?.recently_watched_videos?.map((video, i) => {
                     const watched = Number(video?.watched_seconds) || 0;
                     const duration = video?.duration_seconds || 1;
-                    const durationMin = Math.floor(duration / 60);
-                    const durationSec = duration % 60;
-                    const durationLabel = `${durationMin}:${String(durationSec).padStart(2, '0')}`;
+                    const durationLabel = formatTime(duration);
 
                     return (
                       <div
@@ -396,7 +404,7 @@ const AnalyticsContent = () => {
 
                           {/* watched time of the video */}
                           <p className="text-(--color-text-tertiary) Caption mt-0.5">
-                            {`${Math.floor(watched / 60)}:${String(watched % 60).padStart(2, '0')} watched`}
+                            {`${formatTime(watched)} watched`}
                           </p>
                         </div>
 
