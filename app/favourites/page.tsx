@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Heart, MoreVertical, X, Play } from 'lucide-react';
 import FilterModal from '@/components/favourites/FilterModal';
 import Image from 'next/image';
+import { usePapers } from '@/hooks/usePapers';
+import { useChapters } from '@/hooks/useChapters';
 
 interface FavouriteItem {
   id: number;
@@ -21,7 +23,7 @@ const mockFavourites: FavouriteItem[] = [
     title: 'Nonprofit Organizations',
     duration: '12:30 min',
     tag: 'FR',
-    chapter: 'Chapter 5',
+    chapter: 'Introduction to Financial Reporting',
     image: '/video-thumbnail.svg',
   },
   {
@@ -29,7 +31,7 @@ const mockFavourites: FavouriteItem[] = [
     title: 'For-Profit Companies',
     duration: '15:10 min',
     tag: 'FA',
-    chapter: 'Chapter 6',
+    chapter: 'Conceptual Framework for Financial Reporting',
     image: '/video-thumbnail.svg',
   },
   {
@@ -37,7 +39,7 @@ const mockFavourites: FavouriteItem[] = [
     title: 'Government Agencies',
     duration: '8:20 min',
     tag: 'FA',
-    chapter: 'Chapter 7',
+    chapter: 'Regulatory Framework and Accounting Standards',
     image: '/video-thumbnail.svg',
   },
   {
@@ -45,7 +47,7 @@ const mockFavourites: FavouriteItem[] = [
     title: 'Educational Institutions',
     duration: '10:55 min',
     tag: 'FR',
-    chapter: 'Chapter 8',
+    chapter: 'Presentation of Financial Statements',
     image: '/video-thumbnail.svg',
   },
   {
@@ -53,79 +55,7 @@ const mockFavourites: FavouriteItem[] = [
     title: 'Cooperatives',
     duration: '7:45 min',
     tag: 'FA',
-    chapter: 'Chapter 9',
-    image: '/video-thumbnail.svg',
-  },
-  {
-    id: 6,
-    title: 'Startups',
-    duration: '14:00 min',
-    tag: 'FA',
-    chapter: 'Chapter 10',
-    image: '/video-thumbnail.svg',
-  },
-  {
-    id: 7,
-    title: 'Social Enterprises',
-    duration: '11:15 min',
-    tag: 'FA',
-    chapter: 'Chapter 11',
-    image: '/video-thumbnail.svg',
-  },
-  {
-    id: 8,
-    title: 'Nonprofit Organizations',
-    duration: '12:30 min',
-    tag: 'FR',
-    chapter: 'Chapter 5',
-    image: '/video-thumbnail.svg',
-  },
-  {
-    id: 9,
-    title: 'For-Profit Companies',
-    duration: '15:10 min',
-    tag: 'FA',
-    chapter: 'Chapter 6',
-    image: '/video-thumbnail.svg',
-  },
-  {
-    id: 10,
-    title: 'Government Agencies',
-    duration: '8:20 min',
-    tag: 'FA',
-    chapter: 'Chapter 7',
-    image: '/video-thumbnail.svg',
-  },
-  {
-    id: 11,
-    title: 'Educational Institutions',
-    duration: '10:55 min',
-    tag: 'FR',
-    chapter: 'Chapter 8',
-    image: '/video-thumbnail.svg',
-  },
-  {
-    id: 12,
-    title: 'Cooperatives',
-    duration: '7:45 min',
-    tag: 'FA',
-    chapter: 'Chapter 9',
-    image: '/video-thumbnail.svg',
-  },
-  {
-    id: 13,
-    title: 'Startups',
-    duration: '14:00 min',
-    tag: 'FA',
-    chapter: 'Chapter 10',
-    image: '/video-thumbnail.svg',
-  },
-  {
-    id: 14,
-    title: 'Social Enterprises',
-    duration: '11:15 min',
-    tag: 'FA',
-    chapter: 'Chapter 11',
+    chapter: 'Accounting Policies, Estimates, and Errors',
     image: '/video-thumbnail.svg',
   },
 ];
@@ -137,11 +67,8 @@ const Favourites = () => {
   );
   const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
 
-  useEffect(() => {
-    const handleClickOutside = () => setActiveMenuId(null);
-    window.addEventListener('click', handleClickOutside);
-    return () => window.removeEventListener('click', handleClickOutside);
-  }, []);
+  const { data: papersData } = usePapers();
+  const papers = papersData?.data?.papers || [];
 
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [activeFilterType, setActiveFilterType] = useState<
@@ -150,14 +77,39 @@ const Favourites = () => {
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
   const [selectedChapters, setSelectedChapters] = useState<string[]>([]);
 
-  // Unique lists from mock data
-  const uniquePapers = Array.from(
-    new Set(mockFavourites.map((item) => item.tag))
+  const selectedPaperId = papers.find((p) =>
+    selectedPapers.includes(p.code)
+  )?.paper_id;
+
+  const shouldFetchChapters =
+    activeFilterType === 'Chapter' && isFilterModalOpen && !!selectedPaperId;
+
+  const { data: chaptersData } = useChapters(
+    selectedPaperId,
+    shouldFetchChapters
+  );
+  const chapters = useMemo(
+    () => chaptersData?.data?.chapters || [],
+    [chaptersData]
   );
 
-  const uniqueChapters = Array.from(
-    new Set(mockFavourites.map((item) => item.chapter))
-  );
+  const chapterOptions = useMemo(() => {
+    if (activeFilterType === 'Chapter') {
+      if (selectedPapers.length > 0) {
+        return chapters.map((c) => c.title);
+      }
+
+      return Array.from(new Set(mockFavourites.map((item) => item.chapter)));
+    }
+    return [];
+  }, [activeFilterType, selectedPapers, chapters]);
+
+  useEffect(() => {
+    const handleClickOutside = () => setActiveMenuId(null);
+    window.addEventListener('click', handleClickOutside);
+
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
 
   const handleFilterClick = (filterName: string) => {
     if (filterName === 'All') {
@@ -427,7 +379,9 @@ const Favourites = () => {
           <FilterModal
             type={activeFilterType}
             options={
-              activeFilterType === 'Paper' ? uniquePapers : uniqueChapters
+              activeFilterType === 'Paper'
+                ? papers.map((p) => p.code)
+                : chapterOptions
             }
             selectedValues={
               activeFilterType === 'Paper' ? selectedPapers : selectedChapters
@@ -439,6 +393,7 @@ const Favourites = () => {
             onApply={(selected) => {
               if (activeFilterType === 'Paper') {
                 setSelectedPapers(selected);
+                setSelectedChapters([]);
               } else {
                 setSelectedChapters(selected);
               }
