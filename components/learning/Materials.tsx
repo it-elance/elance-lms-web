@@ -71,10 +71,25 @@ const Materials = ({ lectureId }: MaterialsProps) => {
 
   if (materials.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <p className="Body-Small text-(--color-text-tertiary)">
-          No materials available for this lecture
-        </p>
+      <div className="flex flex-col items-center justify-center flex-1 h-full gap-3">
+        <Image
+          src="/empty-materials.svg"
+          alt="No notes"
+          width={90}
+          height={90}
+          className="opacity-90"
+        />
+
+        <div className="flex flex-col items-center gap-1.5 mt-2">
+          <h3 className="Heading-4 text-(--color-text-primary)">
+            No Materials Available
+          </h3>
+
+          <p className="Body-Small text-(--color-text-tertiary) text-center max-w-xs">
+            Study materials for this topic or chapter haven&apos;t been uploaded
+            yet.
+          </p>
+        </div>
       </div>
     );
   }
