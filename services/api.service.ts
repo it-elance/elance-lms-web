@@ -42,6 +42,10 @@ import type {
   FavouriteMaterialsResponse,
 } from '@/types/favourite.types';
 import type { PaperResponse, ChapterResponse } from '@/types/paper.types';
+import type {
+  GlobalSearchResponse,
+  GlobalSearchTopic,
+} from '@/types/search.types';
 
 // Login API
 export const loginApi = async (body: SendOtpPayload) => {
@@ -241,4 +245,14 @@ export const getFavouriteMaterialsApi = async (params: {
     { params }
   );
   return response.data;
+};
+
+// Global Search API
+export const globalSearchApi = async (
+  query: string
+): Promise<GlobalSearchTopic[]> => {
+  const response = await apiClient.get<GlobalSearchResponse>('/home/search', {
+    params: { search: query },
+  });
+  return response.data.data.topics;
 };
