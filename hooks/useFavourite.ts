@@ -1,7 +1,11 @@
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { favouriteApi } from '@/services/api.service';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import {
+  favouriteApi,
+  getFavouriteLecturesApi,
+  getFavouriteMaterialsApi,
+} from '@/services/api.service';
 import type { FavouritePayload } from '@/types/favourite.types';
 import type { LectureVideoData } from '@/types/lecture.types';
 import type { Material } from '@/types/material.types';
@@ -85,10 +89,51 @@ export const useFavourite = () => {
         );
       }
     },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['favourite-lectures'] });
+      queryClient.invalidateQueries({ queryKey: ['favourite-materials'] });
+    },
   });
 
   return {
     toggleFavourite: mutation.mutate,
     isTogglingFavourite: mutation.isPending,
   };
+};
+
+export const useFavouriteLectures = (
+  params: {
+    chapterId?: string;
+    paperId?: string;
+    search?: string;
+    page?: number;
+    pageSize?: number;
+  },
+  enabled: boolean = true
+) => {
+  return useQuery({
+    queryKey: ['favourite-lectures', params],
+    queryFn: () => getFavouriteLecturesApi(params),
+    enabled,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useFavouriteMaterials = (
+  params: {
+    chapterId?: string;
+    paperId?: string;
+    search?: string;
+    page?: number;
+    pageSize?: number;
+  },
+  enabled: boolean = true
+) => {
+  return useQuery({
+    queryKey: ['favourite-materials', params],
+    queryFn: () => getFavouriteMaterialsApi(params),
+    enabled,
+    staleTime: 1000 * 60 * 5,
+  });
 };

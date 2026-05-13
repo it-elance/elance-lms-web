@@ -1,3 +1,5 @@
+import type { Pagination } from './common.types';
+
 export interface Subject {
   id: string;
   title: string;
@@ -8,19 +10,10 @@ export interface Subject {
   icon_url: string;
 }
 
-export interface MyLearningPagination {
-  current_page: number;
-  page_size: number;
-  total_items: number;
-  total_pages: number;
-  has_next: boolean;
-  has_previous: boolean;
-}
-
 export interface MyLearningResponse {
   status: string;
   data: {
     subjects: Subject[];
   };
-  pagination: MyLearningPagination;
+  pagination: Pagination;
 }

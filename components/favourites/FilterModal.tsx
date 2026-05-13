@@ -21,9 +21,7 @@ const FilterModal = ({
   const [localSearch, setLocalSearch] = useState('');
   const [tempSelected, setTempSelected] = useState<string[]>(selectedValues);
 
-  const filteredList = options.filter((item) =>
-    item.toLowerCase().includes(localSearch.toLowerCase())
-  );
+  const filteredList = options;
 
   const toggleSelection = (item: string) => {
     setTempSelected((prev) =>
