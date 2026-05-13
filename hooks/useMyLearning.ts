@@ -7,7 +7,8 @@ import {
   keepPreviousData,
 } from '@tanstack/react-query';
 import { myLearningApi } from '@/services/api.service';
-import type { Subject, MyLearningPagination } from '@/types/learning.types';
+import type { Subject } from '@/types/learning.types';
+import type { Pagination } from '@/types/common.types';
 
 export const MY_LEARNING_QUERY_KEY = (page: number) =>
   ['my-learning', page] as const;
@@ -24,7 +25,7 @@ export const useMyLearning = () => {
   });
 
   const subjects: Subject[] = data?.subjects ?? [];
-  const pagination: MyLearningPagination | null = data?.pagination ?? null;
+  const pagination: Pagination | null = data?.pagination ?? null;
 
   useEffect(() => {
     if (pagination?.has_next) {

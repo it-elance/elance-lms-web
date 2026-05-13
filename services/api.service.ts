@@ -1,11 +1,8 @@
 import apiClient from './apiClient';
+import type { Pagination } from '@/types/common.types';
 import type { SendOtpPayload, VerifyOtpPayload } from '@/types/auth.types';
 import type { HomeApiResponse, HomeData } from '@/types/home.types';
-import type {
-  MyLearningResponse,
-  Subject,
-  MyLearningPagination,
-} from '@/types/learning.types';
+import type { MyLearningResponse, Subject } from '@/types/learning.types';
 import type {
   LectureChapter,
   LectureByPaperResponse,
@@ -39,7 +36,11 @@ import type {
   NotificationResponse,
   ReadNotificationPayload,
 } from '@/types/notification.types';
-import type { FavouritePayload } from '@/types/favourite.types';
+import type {
+  FavouritePayload,
+  FavouriteLecturesResponse,
+  FavouriteMaterialsResponse,
+} from '@/types/favourite.types';
 import type { PaperResponse, ChapterResponse } from '@/types/paper.types';
 
 // Login API
@@ -68,7 +69,7 @@ export const homeApi = async (): Promise<HomeData> => {
 // My Learning API
 export const myLearningApi = async (
   page: number = 1
-): Promise<{ subjects: Subject[]; pagination: MyLearningPagination }> => {
+): Promise<{ subjects: Subject[]; pagination: Pagination }> => {
   const response = await apiClient.get<MyLearningResponse>(
     '/home/my-learning',
     { params: { page } }
@@ -210,4 +211,34 @@ export const getChaptersApi = async (
 // Favourite API
 export const favouriteApi = async (body: FavouritePayload): Promise<void> => {
   await apiClient.post('/favourite', body);
+};
+
+// Favourite Lectures API
+export const getFavouriteLecturesApi = async (params: {
+  chapterId?: string;
+  paperId?: string;
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<FavouriteLecturesResponse> => {
+  const response = await apiClient.get<FavouriteLecturesResponse>(
+    '/favourite/lectures',
+    { params }
+  );
+  return response.data;
+};
+
+// Favourite Materials API
+export const getFavouriteMaterialsApi = async (params: {
+  chapterId?: string;
+  paperId?: string;
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<FavouriteMaterialsResponse> => {
+  const response = await apiClient.get<FavouriteMaterialsResponse>(
+    '/favourite/materials',
+    { params }
+  );
+  return response.data;
 };

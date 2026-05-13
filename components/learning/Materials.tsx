@@ -6,10 +6,6 @@ import { useTheme } from '@/components/ThemeProvider';
 import type { FavouritePayload } from '@/types/favourite.types';
 import type { Material } from '@/types/material.types';
 
-interface MaterialsProps {
-  lectureId: string | null | undefined;
-}
-
 const FILE_TYPE_THUMBNAILS = ['pdf', 'ppt', 'xls', 'jpg', 'doc'];
 
 const FILE_TYPE_MAP: Record<string, string> = {
@@ -36,6 +32,10 @@ const getMaterialThumbnail = (
 
   return `/${mappedType}-${theme}.svg`;
 };
+
+interface MaterialsProps {
+  lectureId: string | null | undefined;
+}
 
 const Materials = ({ lectureId }: MaterialsProps) => {
   const { materials, isLoading } = useMaterials(lectureId);
