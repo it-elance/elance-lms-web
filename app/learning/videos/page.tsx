@@ -1,24 +1,17 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import {
-  ChevronLeft,
-  Heart,
-  Search,
-  Check,
-  ChevronDown,
-  Play,
-} from 'lucide-react';
+import { ChevronLeft, Heart, Search, Check, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useCourseLectures } from '../../../hooks/useCourseLectures';
 import { useLectureVideo } from '../../../hooks/useLectureVideo';
 import { useFavourite } from '@/hooks/useFavourite';
-import Image from 'next/image';
 import Overview from '../../../components/learning/Overview';
 import Materials from '../../../components/learning/Materials';
 import Notes from '../../../components/learning/Notes';
+import VideoPlayer from '../../../components/VideoPlayer';
 
 const VideosContent = () => {
   const router = useRouter();
@@ -67,6 +60,7 @@ const VideosContent = () => {
   const { videoData, isLoading: isVideoLoading } =
     useLectureVideo(activeLectureId);
   const { toggleFavourite, isTogglingFavourite } = useFavourite();
+  const canPlayVideo = Boolean(videoData?.video_id && videoData?.access_token);
 
   const toggleChapter = (id: string) => {
     setOpenChapters((prev) => ({
@@ -91,11 +85,11 @@ const VideosContent = () => {
         </motion.button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-5 h-full overflow-hidden">
+      <div className="flex flex-col lg:flex-row gap-5 lg:h-full lg:overflow-hidden">
         {/* Left Column: Video Player & Info */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-4 shrink-0 bg-(--color-bg-primary) lg:pb-0 max-h-[60vh] overflow-y-auto lg:overflow-visible lg:max-h-full lg:overflow-y-auto">
+        <div className="w-full lg:w-1/2 flex flex-col gap-4 shrink-0 bg-(--color-bg-primary) lg:pb-0 lg:max-h-full lg:overflow-y-auto">
           {/* Video Player Container */}
-          <div className="relative aspect-video rounded-md overflow-hidden group bg-black flex items-center justify-center cursor-pointer">
+          <div className="relative aspect-video rounded-md overflow-hidden bg-black flex items-center justify-center">
             <AnimatePresence mode="wait">
               {isVideoLoading ? (
                 <motion.div
@@ -113,26 +107,15 @@ const VideosContent = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="absolute inset-0 flex items-center justify-center"
+                  className="absolute inset-0"
                 >
-                  {videoData?.thumbnail_url ? (
-                    <Image
-                      src={videoData?.thumbnail_url}
-                      alt="Video Player"
-                      fill
-                      className="object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-                      priority
-                      unoptimized
+                  {canPlayVideo && videoData ? (
+                    <VideoPlayer
+                      key={videoData?.video_id}
+                      assetId={videoData?.video_id}
+                      accessToken={videoData?.access_token}
                     />
-                  ) : (
-                    <div className="absolute inset-0 bg-(--color-bg-secondary) flex items-center justify-center">
-                      <Play className="w-8 h-8 text-(--color-text-secondary)" />
-                    </div>
-                  )}
-
-                  <div className="absolute flex items-center justify-center w-16 h-16 bg-black/40 backdrop-blur-sm rounded-full group-hover:bg-black/50 transition-colors z-10 border border-white/20 shadow-lg">
-                    <Play className="w-8 h-8 text-white fill-white ml-1" />
-                  </div>
+                  ) : null}
                 </motion.div>
               )}
             </AnimatePresence>
