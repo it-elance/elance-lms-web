@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, ChevronLeft, X, Check } from 'lucide-react';
+import { Search, ChevronLeft, X } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -8,7 +8,9 @@ import { useTheme } from '@/components/ThemeProvider';
 import Image from 'next/image';
 import Link from 'next/link';
 import NotificationPanel from './Notification';
+import SearchResults from '@/components/search/SearchResults';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useGlobalSearch } from '@/hooks/useGlobalSearch';
 
 const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -18,7 +20,14 @@ const Header = () => {
   const { resolvedTheme } = useTheme();
   const { notifications } = useNotifications();
 
+  const {
+    data: searchData,
+    isLoading: isSearching,
+    debouncedQuery: debouncedSearch,
+  } = useGlobalSearch(searchQuery);
+
   const unreadCount = notifications.filter((n) => n.status).length;
+  const topics = searchData ?? [];
 
   const router = useRouter();
 
@@ -37,75 +46,6 @@ const Header = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const searchResults = () => (
-    <motion.div
-      className="space-y-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.2 }}
-    >
-      {/* Topics Section */}
-      <div>
-        <h3 className="Body-Extra-Small text-(--color-text-tertiary) mb-3">
-          Topics
-        </h3>
-
-        <div className="flex flex-col">
-          {[
-            {
-              title: 'Types of organizations',
-              time: '9:47 min',
-              icon: (
-                <div className="w-6 h-6 rounded-full bg-(--color-success-600) flex items-center justify-center shrink-0">
-                  <Check className="w-4 h-4 text-white" />
-                </div>
-              ),
-            },
-            {
-              title: 'Stakeholders',
-              time: '9:47 min',
-              icon: (
-                <div className="w-6 h-6 rounded-full bg-(--color-info-600) border-2 border-(--color-info-500) relative overflow-hidden shrink-0">
-                  <div className="absolute inset-0 bg-(--color-bg-primary) w-3.5 h-full left-[50%]"></div>
-                </div>
-              ),
-            },
-            {
-              title: 'Business environment',
-              time: '9:47 min',
-              icon: (
-                <div className="w-6 h-6 rounded-full border-2 border-(--color-border-light) shrink-0"></div>
-              ),
-            },
-          ].map((topic, index) => (
-            <motion.div
-              key={index}
-              className={`flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-(--color-bg-tertiary) transition-colors ${
-                index !== 2 ? 'border-b border-(--color-border-light) mb-2' : ''
-              }`}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05, duration: 0.2 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div>
-                <div className="Body-Small text-(--color-text-primary)">
-                  {topic.title}
-                </div>
-
-                <div className="Caption-Small text-(--color-text-tertiary) mt-0.5">
-                  {topic.time}
-                </div>
-              </div>
-
-              <div>{topic.icon}</div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
 
   return (
     <>
@@ -174,7 +114,13 @@ const Header = () => {
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {searchResults()}
+                  <SearchResults
+                    topics={topics}
+                    isLoading={isSearching}
+                    query={searchQuery}
+                    debouncedQuery={debouncedSearch}
+                    onSelectResult={() => setIsSearchFocused(false)}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -291,14 +237,19 @@ const Header = () => {
               </div>
             </motion.div>
 
-            <motion.div
-              className="overflow-y-auto"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              {searchResults()}
-            </motion.div>
+            <div className="flex-1 flex flex-col min-h-0">
+              <SearchResults
+                topics={topics}
+                isLoading={isSearching}
+                query={searchQuery}
+                debouncedQuery={debouncedSearch}
+                isMobile
+                onSelectResult={() => {
+                  setIsSearchFocused(false);
+                  setIsSearchOpen(false);
+                }}
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
