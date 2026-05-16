@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { Play, ArrowRight, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useHomeData } from '@/hooks/useHomeData';
+import { useState } from 'react';
+import AnnouncementModal from '@/components/modals/AnnouncementModal';
+import type { Announcement } from '@/types/home.types';
 
 const MotionLink = motion.create(Link);
 
@@ -18,6 +21,8 @@ const CourseCardSkeleton = () => (
 
 const Home = () => {
   const { data, isLoading } = useHomeData();
+  const [selectedAnnouncement, setSelectedAnnouncement] =
+    useState<Announcement | null>(null);
 
   const continueWatching = data?.continue_watching;
   const hasContinueWatching =
@@ -309,7 +314,8 @@ const Home = () => {
                 announcements.map((announcement) => (
                   <div
                     key={announcement?.announcement_id}
-                    className="bg-(--color-bg-primary) rounded-xl border-[1.5px] border-(--color-border) p-2 lg:p-3 flex lg:block gap-2 lg:gap-3"
+                    onClick={() => setSelectedAnnouncement(announcement)}
+                    className="bg-(--color-bg-primary) rounded-xl border-[1.5px] border-(--color-border) p-2 lg:p-3 flex lg:block gap-2 lg:gap-3 cursor-pointer transition-colors"
                   >
                     {announcement?.image_url ? (
                       <div className="relative w-28 lg:w-full lg:h-30 rounded-lg overflow-hidden shrink-0 lg:mb-2">
@@ -349,6 +355,14 @@ const Home = () => {
           </motion.div>
         )}
       </div>
+
+      {selectedAnnouncement && (
+        <AnnouncementModal
+          isOpen={!!selectedAnnouncement}
+          onClose={() => setSelectedAnnouncement(null)}
+          announcement={selectedAnnouncement}
+        />
+      )}
     </div>
   );
 };
