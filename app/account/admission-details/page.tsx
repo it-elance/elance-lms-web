@@ -19,8 +19,8 @@ const AdmissionDetails = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-full w-full relative lg:justify-center">
-      <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none bg-(--color-bg-primary) py-4 lg:absolute lg:top-0 lg:left-0">
+    <div className="flex flex-col min-h-full w-full relative">
+      <div className="sticky top-0 z-10 w-full flex justify-start pointer-events-none bg-(--color-bg-primary) py-4">
         <motion.button
           onClick={() => router.back()}
           className="rounded-full transition-colors pointer-events-auto cursor-pointer"
@@ -66,12 +66,6 @@ const AdmissionDetails = () => {
                 transition={{ duration: 0.4 }}
                 className="bg-(--color-bg-secondary) rounded-xl p-5 flex flex-col relative overflow-hidden"
               >
-                {admission?.is_primary && (
-                  <div className="absolute top-0 right-0 bg-(--color-primary-500) text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
-                    PRIMARY
-                  </div>
-                )}
-
                 {/* Admission ID */}
                 <div className="flex flex-row justify-between items-center py-3">
                   <span className="text-(--color-text-tertiary) Body-Small">
@@ -94,26 +88,6 @@ const AdmissionDetails = () => {
                   <span className="text-(--color-text-primary) Body-Small text-right">
                     {admission?.program?.name}
                   </span>
-                </div>
-
-                <div className="border-b border-(--color-border-light)" />
-
-                {/* Batch */}
-                <div className="flex flex-row justify-between items-center py-3">
-                  <span className="text-(--color-text-tertiary) Body-Small">
-                    Batch
-                  </span>
-
-                  <div className="flex flex-col items-end">
-                    {admission.batch?.map((b) => (
-                      <span
-                        key={b?.batch_id}
-                        className="text-(--color-text-primary) Body-Small text-right"
-                      >
-                        {b?.label}
-                      </span>
-                    ))}
-                  </div>
                 </div>
 
                 <div className="border-b border-(--color-border-light)" />
@@ -151,10 +125,10 @@ const AdmissionDetails = () => {
                   </span>
 
                   <span
-                    className={`px-3 py-1 Caption-Small ${
+                    className={`px-2 py-0.5 rounded text-xs border ${
                       admission?.enrollment_status?.code === 'active'
-                        ? 'text-(--color-success-600)'
-                        : 'text-(--color-text-secondary)'
+                        ? 'text-(--color-success-600) border-(--color-success-600)/20 bg-(--color-success-600)/1'
+                        : 'text-(--color-text-secondary) border-(--color-text-secondary)/20 bg-(--color-text-secondary)/1'
                     }`}
                   >
                     {admission?.enrollment_status?.label}
@@ -163,16 +137,53 @@ const AdmissionDetails = () => {
 
                 <div className="border-b border-(--color-border-light)" />
 
-                {/* Course Validity */}
-                <div className="flex flex-row justify-between items-center py-3">
-                  <span className="text-(--color-text-tertiary) Body-Small">
-                    Course validity
-                  </span>
+                {/* Batch */}
+                <div className="flex flex-col py-3">
+                  <div className="flex flex-row justify-between items-center mb-4">
+                    <span className="text-(--color-text-tertiary) Caption Small">
+                      Batch
+                    </span>
 
-                  <span className="text-(--color-text-primary) Body-Small text-right capitalize">
-                    {admission?.course_validity?.value}{' '}
-                    {admission?.course_validity?.unit}
-                  </span>
+                    <span className="text-(--color-text-tertiary) Body-Small">
+                      {admission?.batch?.length || 0} enrolled
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col space-y-4">
+                    {admission?.batch?.map((b) => {
+                      const parts = b?.label?.split('-');
+                      const subjectCode =
+                        parts && parts.length > 0
+                          ? parts[parts.length - 1]
+                          : '';
+
+                      return (
+                        <div
+                          key={b?.batch_id}
+                          className="flex flex-row justify-between items-center"
+                        >
+                          <div className="flex flex-row items-center space-x-3">
+                            <div className="w-8 h-8 rounded-full bg-(--color-bg-tertiary) flex items-center justify-center">
+                              <SvgIcon
+                                src="/school.svg"
+                                className="w-5 h-4 bg-(--color-text-secondary)"
+                              />
+                            </div>
+
+                            <span className="text-(--color-text-primary) Body-Small">
+                              {b?.label}
+                            </span>
+                          </div>
+
+                          {subjectCode && (
+                            <span className="px-2 py-1 rounded border border-(--color-border-light) text-(--color-text-primary) font-medium Caption-Small">
+                              {subjectCode}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -184,3 +195,25 @@ const AdmissionDetails = () => {
 };
 
 export default AdmissionDetails;
+
+const SvgIcon = ({
+  src,
+  className = '',
+}: {
+  src: string;
+  className?: string;
+}) => (
+  <div
+    className={className}
+    style={{
+      maskImage: `url(${src})`,
+      WebkitMaskImage: `url(${src})`,
+      maskSize: 'contain',
+      WebkitMaskSize: 'contain',
+      maskRepeat: 'no-repeat',
+      WebkitMaskRepeat: 'no-repeat',
+      maskPosition: 'center',
+      WebkitMaskPosition: 'center',
+    }}
+  />
+);
