@@ -97,13 +97,39 @@ const AnalyticsContent = () => {
                   <div className="h-3 w-28 bg-(--color-bg-tertiary) rounded mt-4" />
                 </div>
 
-                <div className="flex items-end gap-2 pb-1 border border-(--color-border-light) rounded-md px-3 pt-4 h-24 w-48">
-                  {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                    <div
-                      key={i}
-                      className="w-3 bg-(--color-bg-tertiary) rounded-t-sm h-full"
-                    />
-                  ))}
+                <div className="relative w-44 h-28 border border-(--color-border-medium) rounded-md flex flex-col shrink-0">
+                  <div className="absolute inset-0 bottom-6 grid grid-cols-7 grid-rows-4 z-0 border-b border-(--color-border-medium) opacity-30">
+                    {Array.from({ length: 28 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`border-(--color-border-medium) ${
+                          (i + 1) % 7 !== 0 ? 'border-r' : ''
+                        } ${i < 21 ? 'border-b' : ''}`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex-1 grid grid-cols-7 items-end z-10 pt-2 px-1">
+                    {[0.6, 0.4, 0.8, 0.5, 0.7, 0.9, 0.3].map((h, i) => (
+                      <div
+                        key={i}
+                        className="flex justify-center h-full items-end pb-0.5"
+                      >
+                        <div
+                          className="w-3.5 bg-(--color-bg-tertiary) rounded-sm"
+                          style={{ height: `${h * 90}%` }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="h-6 grid grid-cols-7 z-10">
+                    {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                      <div key={i} className="flex items-center justify-center">
+                        <div className="w-2 h-2 bg-(--color-bg-tertiary) rounded-full" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -311,38 +337,75 @@ const AnalyticsContent = () => {
                 </div>
 
                 {/* Bar Chart Visualization */}
-                <div className="flex items-end gap-2 pb-1 border border-(--color-border-light) rounded-md px-3 pt-4 h-24">
-                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(
-                    (dayStr, i) => {
-                      const dayData = data?.weekly_activity?.find(
-                        (d) => d.day === dayStr
-                      );
-                      const maxSeconds = Math.max(
-                        ...(data?.weekly_activity?.map(
-                          (d) => d.watch_seconds
-                        ) || [1])
-                      );
-                      const h = dayData
-                        ? dayData.watch_seconds / (maxSeconds || 1)
-                        : 0;
+                <div className="relative w-44 h-28 border border-(--color-border-medium) rounded-md flex flex-col shrink-0 overflow-hidden">
+                  {/* Grid Background */}
+                  <div className="absolute inset-0 bottom-6 grid grid-cols-7 grid-rows-4 z-0 border-b border-(--color-border-medium) opacity-30">
+                    {Array.from({ length: 28 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`border-(--color-border-medium) ${
+                          (i + 1) % 7 !== 0 ? 'border-r' : ''
+                        } ${i < 21 ? 'border-b' : ''}`}
+                      />
+                    ))}
+                  </div>
 
-                      return (
+                  {/* Bars */}
+                  <div className="flex-1 grid grid-cols-7 items-end z-10 pt-2 px-1 relative">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(
+                      (dayStr, i) => {
+                        const dayData = data?.weekly_activity?.find(
+                          (d) => d.day === dayStr
+                        );
+                        const maxSeconds = Math.max(
+                          ...(data?.weekly_activity?.map(
+                            (d) => d.watch_seconds
+                          ) || [1]),
+                          0
+                        );
+                        const h =
+                          dayData && maxSeconds > 0
+                            ? dayData.watch_seconds / maxSeconds
+                            : 0;
+
+                        return (
+                          <div
+                            key={i}
+                            className="flex justify-center h-full items-end pb-0.5 relative"
+                          >
+                            {/* Empty/Ghost Bar */}
+                            <div className="w-3.5 h-[90%] bg-(--color-bg-tertiary) rounded-sm opacity-50" />
+
+                            {/* Actual Data Bar */}
+                            {h > 0 && (
+                              <motion.div
+                                className="absolute bottom-0.5 w-3.5 bg-(--color-success-600) rounded-sm z-20"
+                                initial={{ height: 0 }}
+                                animate={{ height: `${Math.max(h * 90, 5)}%` }}
+                                transition={{ duration: 0.5, delay: i * 0.05 }}
+                              />
+                            )}
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+
+                  {/* Labels */}
+                  <div className="h-6 grid grid-cols-7 z-10 bg-(--color-bg-primary)">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(
+                      (day, i) => (
                         <div
                           key={i}
-                          className="group relative flex flex-col items-center gap-2 h-full justify-end"
+                          className="flex items-center justify-center"
                         >
-                          <div
-                            className="w-3 bg-(--color-success-600) rounded-t-sm"
-                            style={{ height: `${h * 70}%` }}
-                          />
-
-                          <span className="text-[10px] text-(--color-text-disabled)">
-                            {dayStr.charAt(0)}
+                          <span className="text-[10px] text-(--color-text-secondary)">
+                            {day.charAt(0)}
                           </span>
                         </div>
-                      );
-                    }
-                  )}
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
