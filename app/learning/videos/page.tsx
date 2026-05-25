@@ -440,7 +440,7 @@ const VideosContent = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="flex-1 overflow-y-auto custom-scrollbar scrollbar-hide"
+                className="flex-1 flex flex-col overflow-hidden"
               >
                 <Materials lectureId={activeLectureId} />
               </motion.div>
@@ -453,7 +453,7 @@ const VideosContent = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="flex-1 overflow-y-auto custom-scrollbar"
+                className="flex-1 flex flex-col overflow-hidden"
               >
                 <Notes
                   videoId={

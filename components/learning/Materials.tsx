@@ -81,7 +81,7 @@ const Materials = ({ lectureId }: MaterialsProps) => {
 
   if (materials.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center flex-1 h-full gap-3">
+      <div className="flex flex-col items-center justify-center flex-1 h-full gap-3 min-h-[50vh] lg:min-h-0">
         <Image
           src="/empty-materials.svg"
           alt="No notes"

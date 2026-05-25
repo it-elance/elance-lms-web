@@ -96,7 +96,7 @@ const Notes = ({ videoId }: NotesProps) => {
               ))}
             </div>
           ) : notes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center flex-1 gap-3">
+            <div className="flex flex-col items-center justify-center flex-1 gap-3 min-h-[50vh] lg:min-h-0">
               <Image
                 src="/empty-notes.svg"
                 alt="No notes"
