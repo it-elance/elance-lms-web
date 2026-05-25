@@ -455,7 +455,13 @@ const VideosContent = () => {
                 transition={{ duration: 0.2 }}
                 className="flex-1 overflow-y-auto custom-scrollbar"
               >
-                <Notes videoId={videoData?.video_id || ''} />
+                <Notes
+                  videoId={
+                    chapters
+                      .flatMap((c) => c.lessons)
+                      .find((l) => l.id === activeLectureId)?.video_id || ''
+                  }
+                />
               </motion.div>
             )}
           </AnimatePresence>
