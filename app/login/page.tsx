@@ -5,8 +5,14 @@ import { ChevronLeft } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import {
+  isValidPhoneNumber,
+  parsePhoneNumberFromString,
+} from 'libphonenumber-js/mobile';
 import { loginApi, verifyOtpApi } from '@/services/api.service';
+import CountryCodeSelect from '@/components/CountryCodeSelect';
 import type { Variants } from 'framer-motion';
+import type { CountryCode } from 'libphonenumber-js';
 import type { SendOtpPayload, VerifyOtpPayload } from '@/types/auth.types';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
@@ -26,6 +32,7 @@ const Login = () => {
   const [step, setStep] = useState<Step>('SPLASH');
   const [previousStep, setPreviousStep] = useState<Step>('MOBILE');
   const [otp, setOtp] = useState(['', '', '', '']);
+  const [country, setCountry] = useState<CountryCode>('IN');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [seconds, setSeconds] = useState(30);
@@ -35,6 +42,10 @@ const Login = () => {
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const router = useRouter();
+
+  // international format the backend stores, e.g. +919876543210
+  const fullPhoneNumber =
+    parsePhoneNumberFromString(phoneNumber, country)?.number ?? '';
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -60,9 +71,15 @@ const Login = () => {
 
   // handle phone change
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '');
+    const value = e.target.value.replace(/\D/g, '').slice(0, 15);
 
-    if (value.length <= 10) {
+    // stop extra digits once the number is complete, e.g. at 10 for India
+    const isExtraDigit =
+      value.length > phoneNumber.length &&
+      isValidPhoneNumber(phoneNumber, country) &&
+      !isValidPhoneNumber(value, country);
+
+    if (!isExtraDigit) {
       setPhoneNumber(value);
     }
   };
@@ -111,13 +128,18 @@ const Login = () => {
 
   // handle login
   const handleLogin = async () => {
+    if (step === 'MOBILE' && !isValidPhoneNumber(phoneNumber, country)) {
+      toast.error('Enter a valid mobile number');
+      return;
+    }
+
     try {
       setIsLoading(true);
 
       const payload: SendOtpPayload =
         step === 'EMAIL'
           ? { type: 'email', email }
-          : { type: 'phone', phoneNumber: `+91${phoneNumber}` };
+          : { type: 'phone', phoneNumber: fullPhoneNumber };
 
       await loginApi(payload);
 
@@ -144,7 +166,7 @@ const Login = () => {
       const payload: SendOtpPayload =
         previousStep === 'EMAIL'
           ? { type: 'email', email }
-          : { type: 'phone', phoneNumber: `+91${phoneNumber}` };
+          : { type: 'phone', phoneNumber: fullPhoneNumber };
 
       await loginApi(payload);
 
@@ -171,7 +193,7 @@ const Login = () => {
           ? { type: 'email', email, otp: otp.join('') }
           : {
               type: 'phone',
-              phoneNumber: `+91${phoneNumber}`,
+              phoneNumber: fullPhoneNumber,
               otp: otp.join(''),
             };
 
@@ -387,22 +409,17 @@ const Login = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.25 }}
-                      className="space-y-1"
+                      className="relative z-30 space-y-1"
                     >
                       <label className="Caption-Small text-(--color-text-primary)">
                         Country Code
                       </label>
 
-                      <div className="flex w-full items-center gap-2 rounded-4xl border border-(--color-border-medium) bg-(--color-bg-secondary) p-3 mt-1">
-                        <SvgIcon src="/globe.svg" className="h-6 w-6" />
-
-                        <input
-                          type="text"
-                          value="India (+91)"
-                          readOnly
-                          className="w-full bg-(--color-bg-secondary) body-Small outline-none cursor-default"
-                        />
-                      </div>
+                      <CountryCodeSelect
+                        value={country}
+                        onChange={setCountry}
+                        icon={<SvgIcon src="/globe.svg" className="h-6 w-6" />}
+                      />
                     </motion.div>
 
                     {/* mobile number */}
@@ -423,7 +440,6 @@ const Login = () => {
                           type="tel"
                           value={phoneNumber}
                           onChange={handlePhoneChange}
-                          maxLength={10}
                           placeholder="Enter your mobile number"
                           className="w-full bg-(--color-bg-secondary) body-Small outline-none placeholder:text-(--color-text-disabled)"
                           onKeyDown={(e) => {
