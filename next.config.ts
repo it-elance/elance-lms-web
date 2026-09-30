@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  // `/home` is the default route; LayoutWrapper sends logged-out users to `/login`
+  async redirects() {
+    return [{ source: '/', destination: '/home', permanent: false }];
+  },
   images: {
     remotePatterns: [
       {

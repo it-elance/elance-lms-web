@@ -31,6 +31,9 @@ export interface LectureVideoData {
   is_favourite: boolean;
   video_id: string;
   thumbnail_url: string;
+  video_gallery_id: string;
+  batch_id: string;
+  duration: number;
 }
 
 export interface LectureVideoResponse {
@@ -71,4 +74,12 @@ export interface PaperDetailsResponse {
     status: string;
     data: PaperDetailsData;
   };
+}
+
+export interface WatchProgressPayload {
+  videoId: string;
+  batchId: string;
+  seedPosition: number;
+  watchTime: number;
+  isCompleted: boolean;
 }

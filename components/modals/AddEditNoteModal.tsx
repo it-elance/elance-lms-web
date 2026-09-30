@@ -3,11 +3,10 @@
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import type { Note } from '@/types/note.types';
 
 interface AddEditNoteModalProps {
   isOpen: boolean;
-  editingNote: Note | null;
+  time: string;
   noteContent: string;
   isSaving: boolean;
   onClose: () => void;
@@ -17,7 +16,7 @@ interface AddEditNoteModalProps {
 
 const AddEditNoteModal = ({
   isOpen,
-  editingNote,
+  time,
   noteContent,
   isSaving,
   onClose,
@@ -60,7 +59,7 @@ const AddEditNoteModal = ({
             {/* Header / Timestamp */}
             <div className="flex items-center justify-between">
               <span className="px-3 py-1 rounded-full bg-(--color-bg-tertiary) Overline text-(--color-text-primary)">
-                {editingNote ? editingNote.time : '0:00'}
+                {time}
               </span>
 
               <button

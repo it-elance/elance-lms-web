@@ -61,9 +61,9 @@ The web app is a **pure client**: it holds no server-side database and talks to 
   - `POST /login/verify/otp` → verify, returns `{ token }`
 - The JWT `token` is stored in **`localStorage` under `accessToken`**.
 - `apiClient` request interceptor attaches `Authorization: Bearer <token>` to every request.
-- Route protection is handled **client-side** in [`LayoutWrapper`](../components/LayoutWrapper.tsx): unauthenticated users are redirected to `/`, authenticated users on the login page are redirected to `/home`.
+- Route protection is handled **client-side** in [`LayoutWrapper`](../components/LayoutWrapper.tsx): `/` and unknown routes redirect to `/home` (via `next.config.ts` and `app/not-found.tsx`), unauthenticated users are redirected to `/login`, and authenticated users on `/login` are redirected to `/home`.
 
-> ⚠️ Note: auto-logout on `401` is currently commented out in the response interceptor ([`apiClient.ts`](../services/apiClient.ts)).
+- Auto-logout: in the response interceptor ([`apiClient.ts`](../services/apiClient.ts)), a `401` on a request made with a token removes `accessToken` and reloads `/login?session=expired`, which shows a session-expired toast.
 
 ---
 

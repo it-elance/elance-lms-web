@@ -22,7 +22,7 @@ const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
     return () => window.removeEventListener('resize', checkScreen);
   }, []);
 
-  const isLoginPage = pathname === '/' || pathname === '/login';
+  const isLoginPage = pathname === '/login';
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -33,7 +33,7 @@ const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
       setIsAuthReady(true);
 
       if (!hasToken && !isLoginPage) {
-        router.replace('/');
+        router.replace('/login');
         return;
       }
 

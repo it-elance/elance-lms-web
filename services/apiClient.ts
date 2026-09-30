@@ -1,6 +1,20 @@
 import axios from 'axios';
 import { API_URL } from '@/constants/config';
 
+export const SESSION_EXPIRED_PARAM = 'session';
+let isLoggingOut = false;
+
+// A 401 means the session is no longer valid (expired token, or the account was
+// removed). A full page load to /login also drops every cached query. Requests
+// made without a session, such as a wrong OTP, are left alone.
+const handleUnauthorized = () => {
+  if (isLoggingOut || !localStorage.getItem('accessToken')) return;
+  isLoggingOut = true;
+
+  localStorage.removeItem('accessToken');
+  window.location.replace(`/login?${SESSION_EXPIRED_PARAM}=expired`);
+};
+
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
@@ -29,12 +43,9 @@ apiClient.interceptors.response.use(
   (error) => {
     const status = error?.response?.status;
 
-    // if (status === 401) {
-    //   if (typeof window !== 'undefined') {
-    //     localStorage.removeItem('accessToken');
-    //     window.location.href = '/';
-    //   }
-    // }
+    if (status === 401 && typeof window !== 'undefined') {
+      handleUnauthorized();
+    }
 
     if (status === 500) {
       console.error('Server error');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { ChevronLeft, Heart, Search, Check, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -11,7 +11,10 @@ import { useFavourite } from '@/hooks/useFavourite';
 import Overview from '../../../components/learning/Overview';
 import Materials from '../../../components/learning/Materials';
 import Notes from '../../../components/learning/Notes';
-import VideoPlayer from '../../../components/VideoPlayer';
+import VideoPlayer, {
+  getPlayerCurrentTime,
+} from '../../../components/VideoPlayer';
+import type { TPStreamsPlayer } from '@/types/player.types';
 
 const VideosContent = () => {
   const router = useRouter();
@@ -61,6 +64,7 @@ const VideosContent = () => {
     useLectureVideo(activeLectureId);
   const { toggleFavourite, isTogglingFavourite } = useFavourite();
   const canPlayVideo = Boolean(videoData?.video_id && videoData?.access_token);
+  const playerRef = useRef<TPStreamsPlayer | null>(null);
 
   const toggleChapter = (id: string) => {
     setOpenChapters((prev) => ({
@@ -114,6 +118,10 @@ const VideosContent = () => {
                       key={videoData?.video_id}
                       assetId={videoData?.video_id}
                       accessToken={videoData?.access_token}
+                      playerRef={playerRef}
+                      videoGalleryId={videoData?.video_gallery_id}
+                      batchId={videoData?.batch_id}
+                      duration={videoData?.duration}
                     />
                   ) : null}
                 </motion.div>
@@ -461,6 +469,7 @@ const VideosContent = () => {
                       .flatMap((c) => c.lessons)
                       .find((l) => l.id === activeLectureId)?.video_id || ''
                   }
+                  getCurrentTime={() => getPlayerCurrentTime(playerRef.current)}
                 />
               </motion.div>
             )}

@@ -16,6 +16,7 @@ import type {
   LectureVideoResponse,
   PaperDetailsData,
   PaperDetailsResponse,
+  WatchProgressPayload,
 } from '@/types/lecture.types';
 import type {
   Note,
@@ -121,6 +122,12 @@ export const lectureVideoApi = async (
     }
   );
   return response.data.data.data;
+};
+
+// Watch Progress API
+export const storeWatchProgressApi = async (body: WatchProgressPayload) => {
+  const response = await apiClient.post('/general/last-watch/store', body);
+  return response.data;
 };
 
 // Paper Details API
