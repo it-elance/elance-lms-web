@@ -20,7 +20,7 @@ const CourseCardSkeleton = () => (
 );
 
 const Home = () => {
-  const { data, isLoading } = useHomeData();
+  const { data, isLoading, isError, refetch } = useHomeData();
   const [selectedAnnouncement, setSelectedAnnouncement] =
     useState<Announcement | null>(null);
 
@@ -30,6 +30,9 @@ const Home = () => {
 
   const myLearning = data?.my_learning ?? [];
   const announcements = data?.announcements ?? [];
+
+  // Students not yet added to a batch have nothing to watch or study
+  const isEmpty = !isLoading && !hasContinueWatching && myLearning.length === 0;
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-70px)]">
@@ -282,6 +285,43 @@ const Home = () => {
                 </motion.div>
               </div>
             </motion.div>
+          )}
+
+          {/* Empty / error state */}
+          {isEmpty && (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+              <Image
+                src="/empty-papers.svg"
+                alt={isError ? 'Something went wrong' : 'No batch enrolled'}
+                width={70}
+                height={70}
+                className="opacity-90"
+              />
+
+              <div className="flex flex-col items-center gap-1.5 mt-2">
+                <h3 className="Heading-4 text-(--color-text-primary)">
+                  {isError
+                    ? "Couldn't Load Your Home Page"
+                    : 'Not Enrolled in a Batch Yet'}
+                </h3>
+
+                <p className="Body-Small text-(--color-text-tertiary) text-center max-w-xs">
+                  {isError
+                    ? 'Something went wrong while loading your courses. Please try again.'
+                    : "You haven't been added to a batch yet. Your papers and lectures will appear here once you're enrolled."}
+                </p>
+              </div>
+
+              {isError && (
+                <button
+                  type="button"
+                  onClick={() => refetch()}
+                  className="inline-flex items-center justify-center rounded-md h-9 px-4 border border-(--color-border) text-(--color-primary-500) Button-Small hover:bg-(--color-bg-secondary) transition-colors cursor-pointer"
+                >
+                  Try Again
+                </button>
+              )}
+            </div>
           )}
         </div>
 

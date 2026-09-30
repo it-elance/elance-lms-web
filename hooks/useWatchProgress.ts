@@ -9,8 +9,10 @@ import type { TPStreamsPlayer } from '@/types/player.types';
 
 const POLL_INTERVAL_MS = 1000;
 const REPORT_EVERY_SECONDS = 30;
-// A bigger jump between two polls is a seek, not watching
-const MAX_PLAYBACK_STEP_SECONDS = 3;
+// Playback can't move faster than this; a bigger jump between two polls is a seek, not watching.
+// Measured against the real time between polls, because background tabs poll far less often.
+const MAX_PLAYBACK_RATE = 2;
+const STEP_SLACK_SECONDS = 1;
 const COMPLETION_RATIO = 0.95;
 
 interface UseWatchProgressArgs {
@@ -36,6 +38,7 @@ export const useWatchProgress = ({
     let isActive = true;
     let intervalId: ReturnType<typeof setInterval> | undefined;
     let lastPosition: number | null = null;
+    let lastPolledAt = 0;
     let unsentSeconds = 0;
     let isCompleted = false;
     let isCompletionReported = false;
@@ -81,10 +84,15 @@ export const useWatchProgress = ({
       }
       if (!isActive) return;
 
+      const polledAt = performance.now();
       const step = lastPosition === null ? 0 : position - lastPosition;
+      const maxStep =
+        ((polledAt - lastPolledAt) / 1000) * MAX_PLAYBACK_RATE +
+        STEP_SLACK_SECONDS;
       lastPosition = position;
+      lastPolledAt = polledAt;
 
-      if (step > 0 && step <= MAX_PLAYBACK_STEP_SECONDS) {
+      if (step > 0 && step <= maxStep) {
         unsentSeconds += step;
       }
 

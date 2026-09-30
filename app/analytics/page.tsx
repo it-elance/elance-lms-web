@@ -220,19 +220,24 @@ const AnalyticsContent = () => {
               <div className="space-y-2">
                 <p className="Body-Small text-(--color-text-Primary)">
                   Estimated{' '}
-                  {data?.overall_progress?.estimated_time_left_hours || 0} hours
+                  {data?.overall_progress?.estimated_time_left_label ??
+                    `${data?.overall_progress?.estimated_time_left_hours || 0} hours`}{' '}
                   left to complete {data?.course?.title}
                 </p>
 
-                <p className="Body-Small text-(--color-text-Primary)">
-                  Your pace is ahead of 62% of students
-                </p>
+                {!!data?.overall_progress?.pace_percentile && (
+                  <p className="Body-Small text-(--color-text-Primary)">
+                    Your pace is ahead of{' '}
+                    {data.overall_progress.pace_percentile}% of students
+                  </p>
+                )}
 
                 <p className="Body-Small text-(--color-text-Primary)">
                   You may complete this course by{' '}
                   {data?.overall_progress?.expected_completion_date
-                    ? new Date(
-                        data.overall_progress.expected_completion_date
+                    ? // parsed as a local date; a bare YYYY-MM-DD is read as UTC
+                      new Date(
+                        `${data.overall_progress.expected_completion_date}T00:00:00`
                       ).toLocaleDateString('en-US', {
                         month: 'long',
                         day: 'numeric',
@@ -285,8 +290,8 @@ const AnalyticsContent = () => {
 
               <div className="flex flex-col gap-1">
                 <p className="text-(--color-text-primary) Navigation-Tab">
-                  Watched {data?.highlights?.watched_hours_this_week || 0} hours
-                  this week
+                  Watched {data?.watch_time?.this_week_label || '0 min'} this
+                  week
                 </p>
 
                 <p className="text-(--color-text-secondary) Navigation-Tab">
