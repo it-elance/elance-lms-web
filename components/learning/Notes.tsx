@@ -8,13 +8,25 @@ import AddEditNoteModal from '@/components/modals/AddEditNoteModal';
 
 interface NotesProps {
   videoId: string;
+  getCurrentTime: () => Promise<number>;
 }
 
-const Notes = ({ videoId }: NotesProps) => {
+// Seconds -> "m:ss" or "h:mm:ss"
+const formatTimestamp = (totalSeconds: number) => {
+  const seconds = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = String(seconds % 60).padStart(2, '0');
+
+  return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
+};
+
+const Notes = ({ videoId, getCurrentTime }: NotesProps) => {
   const { notes, isLoading, createNote, updateNote, deleteNote } =
     useNotes(videoId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newNote, setNewNote] = useState('');
+  const [noteTime, setNoteTime] = useState('0:00');
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
@@ -26,6 +38,8 @@ const Notes = ({ videoId }: NotesProps) => {
     } else {
       setEditingNote(null);
       setNewNote('');
+      setNoteTime('0:00');
+      getCurrentTime().then((seconds) => setNoteTime(formatTimestamp(seconds)));
     }
     setIsModalOpen(true);
   };
@@ -43,7 +57,7 @@ const Notes = ({ videoId }: NotesProps) => {
     } else {
       createNote.mutate({
         video_id: videoId,
-        time: '0:00',
+        time: noteTime,
         content: newNote,
       });
     }
@@ -190,7 +204,7 @@ const Notes = ({ videoId }: NotesProps) => {
       {/* Add / Edit Note Modal */}
       <AddEditNoteModal
         isOpen={isModalOpen}
-        editingNote={editingNote}
+        time={editingNote ? editingNote.time : noteTime}
         noteContent={newNote}
         isSaving={createNote.isPending || updateNote.isPending}
         onClose={() => {
