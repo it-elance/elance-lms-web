@@ -66,7 +66,7 @@ const Account = () => {
     setIsLogoutOpen(false);
     setIsLoggingOut(false);
 
-    router.push('/');
+    router.push('/login');
   };
 
   return (
