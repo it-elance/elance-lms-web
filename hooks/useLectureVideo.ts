@@ -9,7 +9,14 @@ export const useLectureVideo = (lectureId: string | null | undefined) => {
     queryKey: ['lecture-video', lectureId],
     queryFn: () => lectureVideoApi(lectureId!),
     enabled: !!lectureId,
-    staleTime: 1000 * 60 * 5,
+    // The access token is single-use: once the player has loaded it, TPStreams rejects it
+    // (404 + X-Frame-Options: DENY, which shows a broken frame). So keep it only while this
+    // lecture is on screen, never refetch it in the background (that would reload the
+    // player mid-video), and drop it on leave so coming back always gets a fresh token.
+    staleTime: Infinity,
+    gcTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   return {
