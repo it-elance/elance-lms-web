@@ -10,6 +10,7 @@ import {
   parsePhoneNumberFromString,
 } from 'libphonenumber-js/mobile';
 import { loginApi, verifyOtpApi } from '@/services/api.service';
+import { SESSION_EXPIRED_PARAM } from '@/services/apiClient';
 import CountryCodeSelect from '@/components/CountryCodeSelect';
 import type { Variants } from 'framer-motion';
 import type { CountryCode } from 'libphonenumber-js';
@@ -53,6 +54,17 @@ const Login = () => {
     }, 850);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  // Sent here by the API client after a 401: say why, then tidy the URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get(SESSION_EXPIRED_PARAM) !== 'expired') return;
+
+    toast.error('Your session has expired. Please log in again.', {
+      id: 'session-expired',
+    });
+    window.history.replaceState(null, '', '/login');
   }, []);
 
   useEffect(() => {

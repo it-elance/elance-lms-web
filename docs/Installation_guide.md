@@ -70,4 +70,4 @@ Only `NEXT_PUBLIC_*` variables are needed since this is a pure client app.
 ## Notes
 
 - The auth JWT is stored in **`localStorage`** under `accessToken`.
-- Auto-logout on `401` is currently commented out in the response interceptor (`services/apiClient.ts`).
+- Auto-logout: in the response interceptor (`services/apiClient.ts`), a `401` on a request made with a token removes `accessToken` and reloads `/login?session=expired`, which shows a session-expired toast.
