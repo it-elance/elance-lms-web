@@ -8,7 +8,10 @@ export interface AnalyticsOverallProgress {
   completed_chapters: number;
   total_chapters: number;
   estimated_time_left_hours: number;
+  estimated_time_left_label?: string;
   expected_completion_date: string;
+  // share of classmates who watched less this week; null when there's nothing to compare
+  pace_percentile?: number | null;
 }
 
 export interface AnalyticsWatchTime {
@@ -41,6 +44,8 @@ export interface RecentlyWatchedVideo {
   thumbnail_url: string;
   duration_seconds: number;
   watched_seconds: number | string;
+  // stays true once completed, even while the video is rewatched
+  is_completed?: boolean;
 }
 
 export interface AnalyticsData {

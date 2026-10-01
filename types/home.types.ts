@@ -41,6 +41,8 @@ export interface ContinueWatching {
   last_watched_label: string;
   progress_percent?: number;
   remaining_time_label: number | null;
+  // stays true once completed, even while the video is rewatched
+  is_completed?: boolean;
   watched_seconds?: string;
 }
 

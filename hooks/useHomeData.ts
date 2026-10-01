@@ -7,7 +7,7 @@ import type { HomeData } from '@/types/home.types';
 export const HOME_QUERY_KEY = ['home-data'] as const;
 
 export const useHomeData = () => {
-  const { data, isLoading, error, refetch } = useQuery<HomeData>({
+  const { data, isLoading, isError, error, refetch } = useQuery<HomeData>({
     queryKey: HOME_QUERY_KEY,
     queryFn: homeApi,
   });
@@ -15,6 +15,7 @@ export const useHomeData = () => {
   return {
     data: data ?? null,
     isLoading,
+    isError,
     error: error instanceof Error ? error.message : null,
     refetch,
   };
