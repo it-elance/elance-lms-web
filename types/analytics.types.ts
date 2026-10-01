@@ -44,6 +44,8 @@ export interface RecentlyWatchedVideo {
   thumbnail_url: string;
   duration_seconds: number;
   watched_seconds: number | string;
+  // stays true once completed, even while the video is rewatched
+  is_completed?: boolean;
 }
 
 export interface AnalyticsData {

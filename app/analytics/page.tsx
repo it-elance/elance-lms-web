@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Play, ChevronLeft } from 'lucide-react';
+import { Play, ChevronLeft, CircleCheck } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { useAnalyticsData } from '@/hooks/useAnalyticsData';
@@ -218,7 +218,7 @@ const AnalyticsContent = () => {
               </div>
 
               <div className="space-y-2">
-                <p className="Body-Small text-(--color-text-Primary)">
+                <p className="Body-Small text-(--color-text-primary)">
                   Estimated{' '}
                   {data?.overall_progress?.estimated_time_left_label ??
                     `${data?.overall_progress?.estimated_time_left_hours || 0} hours`}{' '}
@@ -226,13 +226,13 @@ const AnalyticsContent = () => {
                 </p>
 
                 {!!data?.overall_progress?.pace_percentile && (
-                  <p className="Body-Small text-(--color-text-Primary)">
+                  <p className="Body-Small text-(--color-text-primary)">
                     Your pace is ahead of{' '}
                     {data.overall_progress.pace_percentile}% of students
                   </p>
                 )}
 
-                <p className="Body-Small text-(--color-text-Primary)">
+                <p className="Body-Small text-(--color-text-primary)">
                   You may complete this course by{' '}
                   {data?.overall_progress?.expected_completion_date
                     ? // parsed as a local date; a bare YYYY-MM-DD is read as UTC
@@ -470,10 +470,17 @@ const AnalyticsContent = () => {
                             {video?.title}
                           </p>
 
-                          {/* watched time of the video */}
-                          <p className="text-(--color-text-tertiary) Caption mt-0.5">
-                            {`${formatTime(watched)} watched`}
-                          </p>
+                          {/* completed, or how far into the video the student got */}
+                          {video?.is_completed ? (
+                            <p className="flex items-center gap-1 text-(--color-success-600) Caption mt-0.5">
+                              <CircleCheck className="w-3 h-3" />
+                              Completed
+                            </p>
+                          ) : (
+                            <p className="text-(--color-text-tertiary) Caption mt-0.5">
+                              {`${formatTime(watched)} watched`}
+                            </p>
+                          )}
                         </div>
 
                         {/* Duration */}

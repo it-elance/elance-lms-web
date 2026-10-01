@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Play, ArrowRight, Clock } from 'lucide-react';
+import { Play, ArrowRight, Clock, CircleCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useHomeData } from '@/hooks/useHomeData';
 import { useState } from 'react';
@@ -119,7 +119,13 @@ const Home = () => {
                         <div className="flex justify-between items-center Caption-Small text-(--color-text-tertiary)">
                           <span>{continueWatching?.last_watched_label}</span>
 
-                          {continueWatching?.remaining_time_label !== null &&
+                          {continueWatching?.is_completed ? (
+                            <span className="flex items-center gap-1 text-(--color-success-600)">
+                              <CircleCheck className="w-3 h-3" />
+                              Completed
+                            </span>
+                          ) : (
+                            continueWatching?.remaining_time_label !== null &&
                             continueWatching?.remaining_time_label !==
                               undefined && (
                               <span className="flex items-center gap-1">
@@ -130,7 +136,8 @@ const Home = () => {
                                 )}{' '}
                                 min remaining
                               </span>
-                            )}
+                            )
+                          )}
                         </div>
 
                         {continueWatching?.progress_percent !== null && (
