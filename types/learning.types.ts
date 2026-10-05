@@ -1,4 +1,4 @@
-import type { Pagination } from './common.types';
+import type { BatchStatus, Pagination } from './common.types';
 
 export interface Subject {
   id: string;
@@ -8,6 +8,7 @@ export interface Subject {
   completed_chapters: number;
   progress_percentage: number;
   icon_url: string;
+  batch_status: BatchStatus;
 }
 
 export interface MyLearningResponse {

@@ -10,7 +10,11 @@ import {
   parsePhoneNumberFromString,
 } from 'libphonenumber-js/mobile';
 import { loginApi, verifyOtpApi } from '@/services/api.service';
-import { SESSION_EXPIRED_PARAM } from '@/services/apiClient';
+import {
+  SESSION_EXPIRED_PARAM,
+  STUDENT_INACTIVE_CODE,
+  STUDENT_INACTIVE_MESSAGE,
+} from '@/services/apiClient';
 import CountryCodeSelect from '@/components/CountryCodeSelect';
 import type { Variants } from 'framer-motion';
 import type { CountryCode } from 'libphonenumber-js';
@@ -20,13 +24,19 @@ import Image from 'next/image';
 
 type Step = 'SPLASH' | 'MOBILE' | 'EMAIL' | 'OTP';
 
-interface AxiosErrorShape {
-  response?: { data?: { message?: string } };
+// The API client rejects with the backend body ({ message, code }). A network
+// failure rejects with the AxiosError itself, whose message is not for students.
+interface ApiErrorBody {
+  message?: string;
+  code?: string;
+  isAxiosError?: boolean;
 }
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
-  const err = error as AxiosErrorShape;
-  return err?.response?.data?.message ?? fallback;
+  const body = error as ApiErrorBody | null | undefined;
+  if (body?.code === STUDENT_INACTIVE_CODE) return STUDENT_INACTIVE_MESSAGE;
+  if (!body || body.isAxiosError) return fallback;
+  return body.message ?? fallback;
 };
 
 const Login = () => {
@@ -59,11 +69,18 @@ const Login = () => {
   // Sent here by the API client after a 401: say why, then tidy the URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get(SESSION_EXPIRED_PARAM) !== 'expired') return;
+    const reason = params.get(SESSION_EXPIRED_PARAM);
 
-    toast.error('Your session has expired. Please log in again.', {
-      id: 'session-expired',
-    });
+    if (reason === 'expired') {
+      toast.error('Your session has expired. Please log in again.', {
+        id: 'session-expired',
+      });
+    } else if (reason === 'inactive') {
+      toast.error(STUDENT_INACTIVE_MESSAGE, { id: 'session-expired' });
+    } else {
+      return;
+    }
+
     window.history.replaceState(null, '', '/login');
   }, []);
 

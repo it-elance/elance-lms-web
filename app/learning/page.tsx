@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMyLearning } from '@/hooks/useMyLearning';
 import Image from 'next/image';
 import Link from 'next/link';
+import BatchCompletedBadge from '@/components/learning/BatchCompletedBadge';
 
 const MotionLink = motion.create(Link);
 
@@ -54,6 +55,9 @@ const Learning = () => {
                 >
                   {/* Thumbnail */}
                   <div className="relative h-32 w-full rounded overflow-hidden bg-(--color-bg-tertiary)">
+                    {subject?.batch_status === 'completed' && (
+                      <BatchCompletedBadge />
+                    )}
                     {subject?.icon_url ? (
                       <Image
                         src={subject?.icon_url}

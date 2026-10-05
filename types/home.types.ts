@@ -1,3 +1,5 @@
+import type { BatchStatus } from './common.types';
+
 export interface UserProgram {
   program_id: string;
   code: string;
@@ -54,6 +56,7 @@ export interface MyLearningItem {
   completed_chapters: number;
   progress_percentage: number;
   image_url: string;
+  batch_status: BatchStatus;
 }
 
 export interface Announcement {
