@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { materialsByLectureApi } from '@/services/api.service';
+import { isBatchCompletedError } from '@/services/apiClient';
 import type { Material } from '@/types/material.types';
 
 export const MATERIALS_QUERY_KEY = (lectureId: string) =>
@@ -21,11 +22,15 @@ export const useMaterials = (lectureId: string | null | undefined) => {
     enabled: !!actualLectureId,
     staleTime: 1000 * 60 * 5,
     placeholderData: keepPreviousData,
+    // A completed batch stays locked, so asking again is pointless
+    retry: (failureCount, err) =>
+      !isBatchCompletedError(err) && failureCount < 1,
   });
 
   return {
     materials: data ?? [],
     isLoading,
     error: error instanceof Error ? error.message : null,
+    isBatchCompleted: isBatchCompletedError(error),
   };
 };

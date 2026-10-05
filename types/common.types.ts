@@ -1,3 +1,6 @@
+// A completed batch stays listed, but its videos and materials are locked
+export type BatchStatus = 'active' | 'completed';
+
 export interface Pagination {
   current_page: number;
   page_size: number;

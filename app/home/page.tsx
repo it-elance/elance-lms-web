@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play, ArrowRight, Clock, CircleCheck } from 'lucide-react';
+import BatchCompletedBadge from '@/components/learning/BatchCompletedBadge';
 import { motion } from 'framer-motion';
 import { useHomeData } from '@/hooks/useHomeData';
 import { useState } from 'react';
@@ -192,6 +193,9 @@ const Home = () => {
                       className="min-w-[90%] sm:min-w-95 lg:min-w-[calc(33.333%-8px)] lg:w-[calc(33.333%-8px)] shrink-0 bg-(--color-bg-primary) border-[1.5px] border-(--color-border) rounded-xl p-2 relative cursor-pointer"
                     >
                       <div className="relative h-32 w-full rounded-md mb-2 overflow-hidden flex items-center justify-center">
+                        {course?.batch_status === 'completed' && (
+                          <BatchCompletedBadge />
+                        )}
                         {course?.image_url ? (
                           <Image
                             src={course?.image_url}

@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, Suspense } from 'react';
-import { ChevronLeft, Heart, Search, Check, ChevronDown } from 'lucide-react';
+import {
+  ChevronLeft,
+  Heart,
+  Search,
+  Check,
+  ChevronDown,
+  Lock,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
@@ -14,6 +21,7 @@ import Notes from '../../../components/learning/Notes';
 import VideoPlayer, {
   getPlayerCurrentTime,
 } from '../../../components/VideoPlayer';
+import { BATCH_COMPLETED_MESSAGE } from '@/services/apiClient';
 import type { TPStreamsPlayer } from '@/types/player.types';
 
 const VideosContent = () => {
@@ -60,8 +68,11 @@ const VideosContent = () => {
     }
   }, [chapters, activeLectureId, openChapters]);
 
-  const { videoData, isLoading: isVideoLoading } =
-    useLectureVideo(activeLectureId);
+  const {
+    videoData,
+    isLoading: isVideoLoading,
+    isBatchCompleted,
+  } = useLectureVideo(activeLectureId);
   const { toggleFavourite, isTogglingFavourite } = useFavourite();
   const canPlayVideo = Boolean(videoData?.video_id && videoData?.access_token);
   const playerRef = useRef<TPStreamsPlayer | null>(null);
@@ -123,6 +134,16 @@ const VideosContent = () => {
                       batchId={videoData?.batch_id}
                       duration={videoData?.duration}
                     />
+                  ) : isBatchCompleted ? (
+                    <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
+                      <Lock className="w-7 h-7 text-white/70" />
+
+                      <p className="Body-Medium text-white">Batch Completed</p>
+
+                      <p className="Body-Extra-Small text-white/70 max-w-xs">
+                        {BATCH_COMPLETED_MESSAGE}
+                      </p>
+                    </div>
                   ) : null}
                 </motion.div>
               )}
@@ -154,7 +175,7 @@ const VideosContent = () => {
                   <div className="w-6 h-6 rounded-full bg-(--color-bg-secondary) animate-pulse"></div>
                 </div>
               </motion.div>
-            ) : (
+            ) : videoData ? (
               <motion.div
                 key="info-content"
                 initial={{ opacity: 0, y: 5 }}
@@ -210,7 +231,7 @@ const VideosContent = () => {
                   </button>
                 </div>
               </motion.div>
-            )}
+            ) : null}
           </AnimatePresence>
         </div>
 

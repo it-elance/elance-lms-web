@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { lectureVideoApi } from '@/services/api.service';
+import { isBatchCompletedError } from '@/services/apiClient';
 import type { LectureVideoData } from '@/types/lecture.types';
 
 export const useLectureVideo = (lectureId: string | null | undefined) => {
@@ -17,11 +18,15 @@ export const useLectureVideo = (lectureId: string | null | undefined) => {
     gcTime: 0,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    // A completed batch stays locked, so asking again is pointless
+    retry: (failureCount, err) =>
+      !isBatchCompletedError(err) && failureCount < 1,
   });
 
   return {
     videoData: data ?? null,
     isLoading,
     error: error instanceof Error ? error.message : null,
+    isBatchCompleted: isBatchCompletedError(error),
   };
 };

@@ -1,8 +1,10 @@
 import Image from 'next/image';
+import { Lock } from 'lucide-react';
 import { useMemo } from 'react';
 import { useMaterials } from '@/hooks/useMaterials';
 import { useFavourite } from '@/hooks/useFavourite';
 import { useTheme } from '@/components/ThemeProvider';
+import { BATCH_COMPLETED_MESSAGE } from '@/services/apiClient';
 import type { FavouritePayload } from '@/types/favourite.types';
 import type { Material } from '@/types/material.types';
 
@@ -38,7 +40,7 @@ interface MaterialsProps {
 }
 
 const Materials = ({ lectureId }: MaterialsProps) => {
-  const { materials, isLoading } = useMaterials(lectureId);
+  const { materials, isLoading, isBatchCompleted } = useMaterials(lectureId);
   const { toggleFavourite, isTogglingFavourite } = useFavourite();
 
   const { resolvedTheme } = useTheme();
@@ -74,6 +76,26 @@ const Materials = ({ lectureId }: MaterialsProps) => {
               <SkeletonCard key={`chapter-${i}`} />
             ))}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isBatchCompleted) {
+    return (
+      <div className="flex flex-col items-center justify-center flex-1 h-full gap-3 min-h-[50vh] lg:min-h-0">
+        <div className="w-16 h-16 rounded-full bg-(--color-bg-secondary) flex items-center justify-center">
+          <Lock className="w-7 h-7 text-(--color-text-tertiary)" />
+        </div>
+
+        <div className="flex flex-col items-center gap-1.5 mt-2">
+          <h3 className="Heading-4 text-(--color-text-primary)">
+            Batch Completed
+          </h3>
+
+          <p className="Body-Small text-(--color-text-tertiary) text-center max-w-xs">
+            {BATCH_COMPLETED_MESSAGE}
+          </p>
         </div>
       </div>
     );
