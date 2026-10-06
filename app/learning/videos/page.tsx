@@ -133,6 +133,7 @@ const VideosContent = () => {
                       videoGalleryId={videoData?.video_gallery_id}
                       batchId={videoData?.batch_id}
                       duration={videoData?.duration}
+                      resumePosition={videoData?.resume_position}
                     />
                   ) : isBatchCompleted ? (
                     <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">

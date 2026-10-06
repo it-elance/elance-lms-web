@@ -14,6 +14,8 @@ interface VideoPlayerProps {
   videoGalleryId?: string;
   batchId?: string;
   duration?: number;
+  // Seconds to continue from, where the student last stopped
+  resumePosition?: number;
 }
 
 const tpStreamsOrgId = process.env.NEXT_PUBLIC_TPSTREAMS_ORG_ID;
@@ -45,12 +47,44 @@ const VideoPlayer = ({
   videoGalleryId,
   batchId,
   duration,
+  resumePosition,
 }: VideoPlayerProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [player, setPlayer] = useState<TPStreamsPlayer | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useWatchProgress({ player, videoId: videoGalleryId, batchId, duration });
+
+  // Continue from the last position once the student presses play. Seeking
+  // on load would start the video by itself (setCurrentTime plays a video
+  // that hasn't started), so wait for play, or seek now if it already began.
+  useEffect(() => {
+    if (!player || !resumePosition) return;
+
+    let isDone = false;
+    const resume = () => {
+      if (isDone) return;
+      isDone = true;
+      player.setCurrentTime(resumePosition).catch(() => {
+        // Out of range; keep playing from where it is
+      });
+    };
+
+    player.on('play', resume);
+    player
+      .getPaused()
+      .then((isPaused) => {
+        if (!isPaused) resume();
+      })
+      .catch(() => {
+        // The video failed to load, so there is nothing to resume
+      });
+
+    return () => {
+      isDone = true;
+      player.off('play', resume);
+    };
+  }, [player, resumePosition]);
 
   const src = `https://app.tpstreams.com/embed/${tpStreamsOrgId}/${assetId}/?access_token=${accessToken}`;
 
