@@ -34,6 +34,8 @@ export interface LectureVideoData {
   video_gallery_id: string;
   batch_id: string;
   duration: number;
+  // Seconds to resume playback from; 0 starts from the beginning
+  resume_position: number;
 }
 
 export interface LectureVideoResponse {

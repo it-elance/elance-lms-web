@@ -3,6 +3,9 @@
 export interface TPStreamsPlayer {
   loaded(): Promise<void>;
   getCurrentTime(): Promise<number>;
+  // Starts playback when it hasn't started yet
+  setCurrentTime(seconds: number): Promise<number>;
+  getPaused(): Promise<boolean>;
   on(event: string, callback: () => void): void;
   off(event: string, callback?: () => void): void;
 }
