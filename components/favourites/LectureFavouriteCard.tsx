@@ -7,7 +7,6 @@ import type { FavouriteLecture } from '@/types/favourite.types';
 interface LectureFavouriteCardProps {
   lecture: FavouriteLecture;
   index: number;
-  paperId: string;
   activeMenuId: string | null;
   onMenuToggle: (id: string | null) => void;
   onToggleFavourite: (payload: {
@@ -33,13 +32,12 @@ const formatDuration = (totalSeconds: number) => {
 const LectureFavouriteCard = ({
   lecture,
   index,
-  paperId,
   activeMenuId,
   onMenuToggle,
   onToggleFavourite,
 }: LectureFavouriteCardProps) => {
   const router = useRouter();
-  const lectureUrl = `/learning/videos?paper_id=${paperId}&topic_id=${lecture?.lecture_id}`;
+  const lectureUrl = `/learning/videos?paper_id=${lecture?.paper?.id}&topic_id=${lecture?.lecture_id}`;
 
   const handleCardClick = () => {
     router.push(lectureUrl);

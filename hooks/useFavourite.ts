@@ -1,12 +1,20 @@
 'use client';
 
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueryClient,
+  useInfiniteQuery,
+} from '@tanstack/react-query';
 import {
   favouriteApi,
   getFavouriteLecturesApi,
   getFavouriteMaterialsApi,
 } from '@/services/api.service';
-import type { FavouritePayload } from '@/types/favourite.types';
+import type { Pagination } from '@/types/common.types';
+import type {
+  FavouriteFilters,
+  FavouritePayload,
+} from '@/types/favourite.types';
 import type { LectureVideoData } from '@/types/lecture.types';
 import type { Material } from '@/types/material.types';
 
@@ -102,37 +110,34 @@ export const useFavourite = () => {
   };
 };
 
+const getNextPage = (lastPage: { pagination: Pagination }) =>
+  lastPage.pagination.has_next
+    ? lastPage.pagination.current_page + 1
+    : undefined;
+
 export const useFavouriteLectures = (
-  params: {
-    chapterId?: string;
-    paperId?: string;
-    search?: string;
-    page?: number;
-    pageSize?: number;
-  },
+  filters: FavouriteFilters,
   enabled: boolean = true
 ) => {
-  return useQuery({
-    queryKey: ['favourite-lectures', params],
-    queryFn: () => getFavouriteLecturesApi(params),
+  return useInfiniteQuery({
+    queryKey: ['favourite-lectures', filters],
+    queryFn: ({ pageParam }) => getFavouriteLecturesApi(filters, pageParam),
+    initialPageParam: 1,
+    getNextPageParam: getNextPage,
     enabled,
     staleTime: 1000 * 60 * 5,
   });
 };
 
 export const useFavouriteMaterials = (
-  params: {
-    chapterId?: string;
-    paperId?: string;
-    search?: string;
-    page?: number;
-    pageSize?: number;
-  },
+  filters: FavouriteFilters,
   enabled: boolean = true
 ) => {
-  return useQuery({
-    queryKey: ['favourite-materials', params],
-    queryFn: () => getFavouriteMaterialsApi(params),
+  return useInfiniteQuery({
+    queryKey: ['favourite-materials', filters],
+    queryFn: ({ pageParam }) => getFavouriteMaterialsApi(filters, pageParam),
+    initialPageParam: 1,
+    getNextPageParam: getNextPage,
     enabled,
     staleTime: 1000 * 60 * 5,
   });

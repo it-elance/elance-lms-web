@@ -6,16 +6,25 @@ export interface FavouritePayload {
   is_favourite: boolean;
 }
 
+// Empty lists mean no filter
+export interface FavouriteFilters {
+  paperIds: string[];
+  chapterIds: string[];
+  search: string;
+}
+
 export interface FavouriteLecture {
   lecture_id: string;
   title: string;
   duration_seconds: number;
   duration_label: string;
   paper: {
+    id: string;
     code: string;
     name: string;
   };
   chapter: {
+    id: string;
     number: number;
     title: string;
   };
@@ -35,10 +44,12 @@ export interface FavouriteMaterial {
     preview_url: string;
   };
   paper: {
+    id: string;
     code: string;
     name: string;
   };
   chapter: {
+    id: string;
     number: number;
     title: string;
   };

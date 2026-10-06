@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 import Image from 'next/image';
 
 import FilterModal from '@/components/favourites/FilterModal';
+import type { FilterOption } from '@/components/favourites/FilterModal';
 import LectureFavouriteCard from '@/components/favourites/LectureFavouriteCard';
 import MaterialFavouriteCard from '@/components/favourites/MaterialFavouriteCard';
 
@@ -21,6 +22,8 @@ import { usePapers } from '@/hooks/usePapers';
 import { useChapters } from '@/hooks/useChapters';
 import { useDebounce } from '@/hooks/useDebounce';
 
+import type { FavouriteFilters } from '@/types/favourite.types';
+
 const FILTERS = [
   { name: 'All', icon: '/filter.svg' },
   { name: 'Paper', icon: '/paper.svg' },
@@ -29,6 +32,9 @@ const FILTERS = [
 
 type TabType = 'Lectures' | 'Materials';
 type FilterType = 'Paper' | 'Chapter';
+
+const sameIds = (a: string[], b: string[]) =>
+  a.length === b.length && a.every((id) => b.includes(id));
 
 const SearchInput = ({
   value,
@@ -67,95 +73,78 @@ const Favourites = () => {
 
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-
+  // The filter whose modal is open
   const [activeFilterType, setActiveFilterType] = useState<FilterType | null>(
     null
   );
 
-  const [filters, setFilters] = useState({
-    papers: [] as string[],
-    chapters: [] as string[],
-  });
+  const [selectedPaperIds, setSelectedPaperIds] = useState<string[]>([]);
+  const [selectedChapterIds, setSelectedChapterIds] = useState<string[]>([]);
 
   const { resolvedTheme } = useTheme();
 
   const { toggleFavourite } = useFavourite();
 
-  const { data: papersData } = usePapers();
+  // Only the papers the student is enrolled in
+  const { data: papersData, isLoading: isLoadingPapers } = usePapers();
 
-  const papers = useMemo(() => papersData?.data?.papers ?? [], [papersData]);
-
-  const paperCodeMap = useMemo(
+  const paperOptions = useMemo<FilterOption[]>(
     () =>
-      papers.reduce<Record<string, string>>((acc, paper) => {
-        acc[paper.code] = paper.paper_id;
-        return acc;
-      }, {}),
-    [papers]
+      (papersData?.data?.papers ?? []).map((paper) => ({
+        value: paper.paper_id,
+        label: paper.code,
+      })),
+    [papersData]
   );
 
-  const selectedPaperId = papers.find((paper) =>
-    filters.papers.includes(paper.code)
-  )?.paper_id;
-
-  const shouldFetchChapters =
-    isFilterModalOpen && activeFilterType === 'Chapter' && !!selectedPaperId;
-
-  const { data: chaptersData } = useChapters(
-    selectedPaperId,
-    shouldFetchChapters
+  // Loaded when the chapter modal opens: the selected papers' chapters, or all of them
+  const { data: chaptersData, isLoading: isLoadingChapters } = useChapters(
+    selectedPaperIds,
+    activeFilterType === 'Chapter'
   );
 
-  const chapters = useMemo(
-    () => chaptersData?.data?.chapters ?? [],
+  // Chapter titles repeat across papers, so each shows its paper
+  const chapterOptions = useMemo<FilterOption[]>(
+    () =>
+      (chaptersData?.data?.chapters ?? []).map((chapter) => ({
+        value: chapter.chapter_id,
+        label: chapter.title,
+        hint: chapter.paper_code,
+      })),
     [chaptersData]
   );
 
-  const selectedChapterId = chapters.find((chapter) =>
-    filters.chapters.includes(chapter.title)
-  )?.chapter_id;
+  const filters: FavouriteFilters = {
+    paperIds: selectedPaperIds,
+    chapterIds: selectedChapterIds,
+    search: debouncedSearch,
+  };
 
-  const chapterOptions = useMemo(
-    () =>
-      activeFilterType === 'Chapter'
-        ? chapters.map((chapter) => chapter.title)
-        : [],
-    [activeFilterType, chapters]
+  const isFiltered =
+    selectedPaperIds.length > 0 ||
+    selectedChapterIds.length > 0 ||
+    debouncedSearch !== '';
+
+  const lecturesQuery = useFavouriteLectures(filters, activeTab === 'Lectures');
+
+  const materialsQuery = useFavouriteMaterials(
+    filters,
+    activeTab === 'Materials'
   );
 
-  const { data: lecturesData, isLoading: isLoadingLectures } =
-    useFavouriteLectures(
-      {
-        paperId: selectedPaperId,
-        chapterId: selectedChapterId,
-        search: debouncedSearch,
-      },
-      activeTab === 'Lectures'
-    );
-
-  const { data: materialsData, isLoading: isLoadingMaterials } =
-    useFavouriteMaterials(
-      {
-        paperId: selectedPaperId,
-        chapterId: selectedChapterId,
-        search: debouncedSearch,
-      },
-      activeTab === 'Materials'
-    );
-
   const lectureItems = useMemo(
-    () => lecturesData?.data?.lectures ?? [],
-    [lecturesData]
+    () => lecturesQuery.data?.pages.flatMap((page) => page.data.lectures) ?? [],
+    [lecturesQuery.data]
   );
 
   const materialItems = useMemo(
-    () => materialsData?.data?.materials ?? [],
-    [materialsData]
+    () =>
+      materialsQuery.data?.pages.flatMap((page) => page.data.materials) ?? [],
+    [materialsQuery.data]
   );
 
-  const isLoading =
-    activeTab === 'Lectures' ? isLoadingLectures : isLoadingMaterials;
+  const { isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    activeTab === 'Lectures' ? lecturesQuery : materialsQuery;
 
   const hasItems =
     activeTab === 'Lectures'
@@ -172,20 +161,49 @@ const Favourites = () => {
     };
   }, []);
 
-  const handleFilterClick = (filterName: string) => {
+  // Loads the next page when the end of the list comes into view
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node || !hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) fetchNextPage();
+      },
+      { rootMargin: '200px' }
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [activeTab, hasItems, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handleFilterClick = (filterName: (typeof FILTERS)[number]['name']) => {
     if (filterName === 'All') {
-      setFilters({
-        papers: [],
-        chapters: [],
-      });
+      setSelectedPaperIds([]);
+      setSelectedChapterIds([]);
 
       setSearchQuery('');
 
       return;
     }
 
-    setActiveFilterType(filterName as FilterType);
-    setIsFilterModalOpen(true);
+    setActiveFilterType(filterName);
+  };
+
+  const handleApply = (selected: string[]) => {
+    if (activeFilterType === 'Paper') {
+      // Chapters were picked from the previous papers
+      if (!sameIds(selected, selectedPaperIds)) setSelectedChapterIds([]);
+
+      setSelectedPaperIds(selected);
+    } else {
+      setSelectedChapterIds(selected);
+    }
+
+    setActiveFilterType(null);
   };
 
   return (
@@ -233,10 +251,10 @@ const Favourites = () => {
           {FILTERS.map((filter) => {
             const isActive =
               (filter.name === 'All' &&
-                filters.papers.length === 0 &&
-                filters.chapters.length === 0) ||
-              (filter.name === 'Paper' && filters.papers.length > 0) ||
-              (filter.name === 'Chapter' && filters.chapters.length > 0);
+                selectedPaperIds.length === 0 &&
+                selectedChapterIds.length === 0) ||
+              (filter.name === 'Paper' && selectedPaperIds.length > 0) ||
+              (filter.name === 'Chapter' && selectedChapterIds.length > 0);
 
             return (
               <button
@@ -294,12 +312,21 @@ const Favourites = () => {
 
             <div className="flex flex-col items-center gap-1.5 mt-2">
               <h3 className="Heading-4 text-(--color-text-primary)">
-                No Favourites Yet
+                {isFiltered ? 'No Matching Favourites' : 'No Favourites Yet'}
               </h3>
 
               <p className="Body-Small text-(--color-text-tertiary) text-center max-w-xs">
-                Add lessons to favourites for quick access <br />
-                anytime
+                {isFiltered ? (
+                  <>
+                    Try another paper, chapter <br />
+                    or search
+                  </>
+                ) : (
+                  <>
+                    Add lessons to favourites for quick access <br />
+                    anytime
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -311,7 +338,6 @@ const Favourites = () => {
                     key={lecture?.lecture_id}
                     lecture={lecture}
                     index={index}
-                    paperId={paperCodeMap[lecture?.paper?.code || '']}
                     activeMenuId={activeMenuId}
                     onMenuToggle={setActiveMenuId}
                     onToggleFavourite={toggleFavourite}
@@ -328,43 +354,34 @@ const Favourites = () => {
                     onToggleFavourite={toggleFavourite}
                   />
                 ))}
+
+            {isFetchingNextPage && (
+              <div className="h-24 w-full bg-(--color-bg-secondary) rounded-lg animate-pulse" />
+            )}
+
+            <div ref={loadMoreRef} />
           </div>
         )}
       </div>
 
       {/* Filter Modal */}
       <AnimatePresence>
-        {isFilterModalOpen && activeFilterType && (
+        {activeFilterType && (
           <FilterModal
             type={activeFilterType}
             options={
-              activeFilterType === 'Paper'
-                ? papers.map((p) => p.code)
-                : chapterOptions
+              activeFilterType === 'Paper' ? paperOptions : chapterOptions
             }
             selectedValues={
-              activeFilterType === 'Paper' ? filters.papers : filters.chapters
+              activeFilterType === 'Paper'
+                ? selectedPaperIds
+                : selectedChapterIds
             }
-            onClose={() => {
-              setIsFilterModalOpen(false);
-              setActiveFilterType(null);
-            }}
-            onApply={(selected) => {
-              if (activeFilterType === 'Paper') {
-                setFilters({
-                  papers: selected,
-                  chapters: [],
-                });
-              } else {
-                setFilters((prev) => ({
-                  ...prev,
-                  chapters: selected,
-                }));
-              }
-
-              setIsFilterModalOpen(false);
-              setActiveFilterType(null);
-            }}
+            isLoading={
+              activeFilterType === 'Paper' ? isLoadingPapers : isLoadingChapters
+            }
+            onClose={() => setActiveFilterType(null)}
+            onApply={handleApply}
           />
         )}
       </AnimatePresence>

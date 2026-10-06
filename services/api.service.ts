@@ -38,6 +38,7 @@ import type {
   ReadNotificationPayload,
 } from '@/types/notification.types';
 import type {
+  FavouriteFilters,
   FavouritePayload,
   FavouriteLecturesResponse,
   FavouriteMaterialsResponse,
@@ -210,11 +211,16 @@ export const getPapersApi = async (): Promise<PaperResponse> => {
   return response.data;
 };
 
+// The backend takes a list of ids as one comma-separated value
+const idListParam = (ids: string[]) =>
+  ids.length > 0 ? ids.join(',') : undefined;
+
+// Chapters of these papers, or of all the student's papers when none are given
 export const getChaptersApi = async (
-  paperId: string
+  paperIds: string[]
 ): Promise<ChapterResponse> => {
   const response = await apiClient.get<ChapterResponse>('/chapter', {
-    params: { paper_id: paperId },
+    params: { paper_id: idListParam(paperIds) },
   });
   return response.data;
 };
@@ -224,32 +230,36 @@ export const favouriteApi = async (body: FavouritePayload): Promise<void> => {
   await apiClient.post('/favourite', body);
 };
 
+export const FAVOURITES_PAGE_SIZE = 20;
+
+const favouriteListParams = (filters: FavouriteFilters, page: number) => ({
+  paperId: idListParam(filters.paperIds),
+  chapterId: idListParam(filters.chapterIds),
+  search: filters.search || undefined,
+  page,
+  page_size: FAVOURITES_PAGE_SIZE,
+});
+
 // Favourite Lectures API
-export const getFavouriteLecturesApi = async (params: {
-  chapterId?: string;
-  paperId?: string;
-  search?: string;
-  page?: number;
-  pageSize?: number;
-}): Promise<FavouriteLecturesResponse> => {
+export const getFavouriteLecturesApi = async (
+  filters: FavouriteFilters,
+  page: number
+): Promise<FavouriteLecturesResponse> => {
   const response = await apiClient.get<FavouriteLecturesResponse>(
     '/favourite/lectures',
-    { params }
+    { params: favouriteListParams(filters, page) }
   );
   return response.data;
 };
 
 // Favourite Materials API
-export const getFavouriteMaterialsApi = async (params: {
-  chapterId?: string;
-  paperId?: string;
-  search?: string;
-  page?: number;
-  pageSize?: number;
-}): Promise<FavouriteMaterialsResponse> => {
+export const getFavouriteMaterialsApi = async (
+  filters: FavouriteFilters,
+  page: number
+): Promise<FavouriteMaterialsResponse> => {
   const response = await apiClient.get<FavouriteMaterialsResponse>(
     '/favourite/materials',
-    { params }
+    { params: favouriteListParams(filters, page) }
   );
   return response.data;
 };

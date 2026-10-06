@@ -3,10 +3,18 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { Search, X, Check } from 'lucide-react';
 
+export interface FilterOption {
+  value: string;
+  label: string;
+  // Shown beside the label, e.g. the paper a chapter belongs to
+  hint?: string;
+}
+
 interface FilterModalProps {
   type: string;
-  options: string[];
+  options: FilterOption[];
   selectedValues: string[];
+  isLoading?: boolean;
   onClose: () => void;
   onApply: (selected: string[]) => void;
 }
@@ -15,13 +23,21 @@ const FilterModal = ({
   type,
   options,
   selectedValues,
+  isLoading = false,
   onClose,
   onApply,
 }: FilterModalProps) => {
   const [localSearch, setLocalSearch] = useState('');
   const [tempSelected, setTempSelected] = useState<string[]>(selectedValues);
 
-  const filteredList = options;
+  const searchTerm = localSearch.trim().toLowerCase();
+  const filteredList = searchTerm
+    ? options.filter((option) =>
+        `${option.label} ${option.hint ?? ''}`
+          .toLowerCase()
+          .includes(searchTerm)
+      )
+    : options;
 
   const toggleSelection = (item: string) => {
     setTempSelected((prev) =>
@@ -79,12 +95,12 @@ const FilterModal = ({
 
         {/* List */}
         <div className="flex-1 overflow-y-auto px-2">
-          {filteredList.map((item) => {
-            const isSelected = tempSelected.includes(item);
+          {filteredList.map((option) => {
+            const isSelected = tempSelected.includes(option.value);
             return (
               <div
-                key={item}
-                onClick={() => toggleSelection(item)}
+                key={option.value}
+                onClick={() => toggleSelection(option.value)}
                 className="flex items-center gap-3 p-3 border-b border-(--color-border-light) last:border-none cursor-pointer"
               >
                 <div
@@ -97,16 +113,22 @@ const FilterModal = ({
                   {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
                 </div>
 
-                <span className="Body-Extra-Small text-(--color-text-primary)">
-                  {item}
+                <span className="Body-Extra-Small text-(--color-text-primary) flex-1 min-w-0 truncate">
+                  {option.label}
                 </span>
+
+                {option.hint && (
+                  <span className="px-1.5 py-0.5 text-[10px] uppercase font-bold text-(--color-text-secondary) border border-(--color-border-medium) rounded shrink-0">
+                    {option.hint}
+                  </span>
+                )}
               </div>
             );
           })}
 
           {filteredList.length === 0 && (
             <div className="p-4 text-center text-sm text-(--color-text-tertiary)">
-              No results found
+              {isLoading ? 'Loading...' : 'No results found'}
             </div>
           )}
         </div>
