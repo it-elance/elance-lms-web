@@ -17,17 +17,14 @@ export interface Chapter {
   chapter_id: string;
   title: string;
   chapter_number: number;
+  paper_id: string;
+  paper_code: string;
   is_selected?: boolean;
 }
 
 export interface ChapterResponse {
   status: string;
   data: {
-    paper: {
-      paper_id: string;
-      code: string;
-      name: string;
-    };
     chapters: Chapter[];
   };
 }
