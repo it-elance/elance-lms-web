@@ -39,13 +39,17 @@ export interface AnalyticsHighlights {
 export interface RecentlyWatchedVideo {
   paper_id: string;
   chapter_id: string;
+  // entity_id for the favourite toggle; null if the lecture is gone
+  lecture_id: string | null;
   topic_id: string;
   title: string;
   thumbnail_url: string;
   duration_seconds: number;
-  watched_seconds: number | string;
+  // Seconds into the video where the student stopped
+  watched_seconds: number;
   // stays true once completed, even while the video is rewatched
   is_completed?: boolean;
+  is_favourite: boolean;
 }
 
 export interface AnalyticsData {

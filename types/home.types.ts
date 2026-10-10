@@ -42,10 +42,12 @@ export interface ContinueWatching {
   thumbnail_url: string;
   last_watched_label: string;
   progress_percent?: number;
-  remaining_time_label: number | null;
+  // e.g. "9 min left"; null once completed or when the duration is unknown
+  remaining_time_label: string | null;
   // stays true once completed, even while the video is rewatched
   is_completed?: boolean;
-  watched_seconds?: string;
+  // Seconds into the video where the student stopped
+  watched_seconds: number;
 }
 
 export interface MyLearningItem {

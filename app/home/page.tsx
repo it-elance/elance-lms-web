@@ -126,16 +126,10 @@ const Home = () => {
                               Completed
                             </span>
                           ) : (
-                            continueWatching?.remaining_time_label !== null &&
-                            continueWatching?.remaining_time_label !==
-                              undefined && (
+                            continueWatching?.remaining_time_label && (
                               <span className="flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
-                                {Math.ceil(
-                                  (continueWatching?.remaining_time_label ??
-                                    0) / 60
-                                )}{' '}
-                                min remaining
+                                {continueWatching.remaining_time_label}
                               </span>
                             )
                           )}
