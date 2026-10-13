@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Play, ArrowRight, Clock, CircleCheck } from 'lucide-react';
+import { Play, ArrowRight, Clock, CircleCheck, RotateCcw } from 'lucide-react';
 import BatchCompletedBadge from '@/components/learning/BatchCompletedBadge';
 import { motion } from 'framer-motion';
 import { useHomeData } from '@/hooks/useHomeData';
@@ -85,13 +85,20 @@ const Home = () => {
                         </div>
                       )}
 
-                      {/* Resume Button */}
+                      {/* Resume, or Watch again once completed: a video
+                          finished near the end starts over */}
                       <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                         <div className="flex items-center gap-2 bg-white/20 text-white px-4 py-1.5 lg:px-6 lg:py-2 rounded-full transition-all border border-white/40 cursor-pointer">
-                          <Play className="w-4 h-4 lg:w-5 lg:h-5" />
+                          {continueWatching?.is_completed ? (
+                            <RotateCcw className="w-4 h-4 lg:w-5 lg:h-5" />
+                          ) : (
+                            <Play className="w-4 h-4 lg:w-5 lg:h-5" />
+                          )}
 
                           <span className="font-medium text-sm lg:text-base">
-                            Resume
+                            {continueWatching?.is_completed
+                              ? 'Watch again'
+                              : 'Resume'}
                           </span>
                         </div>
                       </div>
@@ -363,12 +370,13 @@ const Home = () => {
                     className="bg-(--color-bg-primary) rounded-xl border-[1.5px] border-(--color-border) p-2 lg:p-3 flex lg:block gap-2 lg:gap-3 cursor-pointer transition-colors"
                   >
                     {announcement?.image_url ? (
-                      <div className="relative w-28 lg:w-full lg:h-30 rounded-lg overflow-hidden shrink-0 lg:mb-2">
+                      <div className="relative w-28 lg:w-full lg:h-30 rounded-lg overflow-hidden shrink-0 lg:mb-2 bg-(--color-bg-tertiary)">
+                        {/* The whole image, never cropped, so text in it stays readable */}
                         <Image
                           src={announcement?.image_url}
                           alt={announcement?.title}
                           fill
-                          className="object-cover"
+                          className="object-contain"
                           unoptimized
                         />
                       </div>

@@ -15,7 +15,10 @@ export const useCourseLectures = (paperId: string) => {
       return response.sort((a, b) => (a.order || 0) - (b.order || 0));
     },
     enabled: !!paperId,
-    staleTime: 1000 * 60 * 5,
+    // Lectures a tutor deletes or unpublishes should drop out soon: refresh after
+    // 30 seconds, and when the student comes back to the tab
+    staleTime: 1000 * 30,
+    refetchOnWindowFocus: true,
     placeholderData: keepPreviousData,
   });
 
