@@ -10,6 +10,10 @@ export const useHomeData = () => {
   const { data, isLoading, isError, error, refetch } = useQuery<HomeData>({
     queryKey: HOME_QUERY_KEY,
     queryFn: homeApi,
+    // Continue Watching drops a lecture a tutor deletes or unpublishes: refresh
+    // after 30 seconds, and when the student comes back to the tab
+    staleTime: 1000 * 30,
+    refetchOnWindowFocus: true,
   });
 
   return {
