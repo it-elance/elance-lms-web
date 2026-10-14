@@ -1,6 +1,10 @@
 import apiClient from './apiClient';
 import type { Pagination } from '@/types/common.types';
-import type { SendOtpPayload, VerifyOtpPayload } from '@/types/auth.types';
+import type {
+  SendOtpPayload,
+  SessionTokens,
+  VerifyOtpPayload,
+} from '@/types/auth.types';
 import type { HomeApiResponse, HomeData } from '@/types/home.types';
 import type { MyLearningResponse, Subject } from '@/types/learning.types';
 import type {
@@ -55,15 +59,28 @@ export const loginApi = async (body: SendOtpPayload) => {
   return response.data;
 };
 
-// Verify OTP API
+// Verify OTP API: a short-lived access token and a refresh token to renew it
+// (see apiClient.ts)
 export const verifyOtpApi = async (
   body: VerifyOtpPayload
-): Promise<{ token: string }> => {
-  const response = await apiClient.post<{ token: string }>(
+): Promise<SessionTokens> => {
+  const response = await apiClient.post<SessionTokens>(
     '/login/verify/otp',
     body
   );
   return response.data;
+};
+
+// Ends the session on the server, so its refresh token can't be used again.
+// Best effort: the student is logged out on this device either way.
+export const logoutApi = async (): Promise<void> => {
+  const refreshToken = localStorage.getItem('refreshToken');
+  if (!refreshToken) return;
+
+  // Capped, so a slow server can't hold up the logout button
+  await apiClient
+    .post('/auth/logout', { refreshToken }, { timeout: 5000 })
+    .catch((error: unknown) => console.warn('Logout failed:', error));
 };
 
 // Home API

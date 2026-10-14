@@ -228,6 +228,7 @@ const Login = () => {
 
       const res = await verifyOtpApi(payload);
       localStorage.setItem('accessToken', res.token);
+      localStorage.setItem('refreshToken', res.refreshToken);
 
       toast.success('Login successful');
 

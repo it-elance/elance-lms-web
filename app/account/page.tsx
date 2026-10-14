@@ -7,6 +7,7 @@ import Image from 'next/image';
 import toast from 'react-hot-toast';
 import LogoutModal from '../../components/modals/LogoutModal';
 import { useHomeData } from '@/hooks/useHomeData';
+import { logoutApi } from '@/services/api.service';
 import { User } from 'lucide-react';
 
 const menuItems = [
@@ -58,7 +59,11 @@ const Account = () => {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Ends the session on the server before the tokens are cleared below
+    await Promise.all([
+      new Promise((resolve) => setTimeout(resolve, 500)),
+      logoutApi(),
+    ]);
 
     localStorage.clear();
     toast.success('Logged out successfully');
