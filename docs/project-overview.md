@@ -58,12 +58,13 @@ The web app is a **pure client**: it holds no server-side database and talks to 
 
 - **Passwordless OTP login** — user submits a **mobile number** (`+91` hardcoded country code) **or email**; backend sends an OTP; user verifies the 4-digit code.
   - `POST /login/store` → send OTP
-  - `POST /login/verify/otp` → verify, returns `{ token }`
-- The JWT `token` is stored in **`localStorage` under `accessToken`**.
+  - `POST /login/verify/otp` → verify, returns `{ token, refreshToken }`
+- The JWT `token` is stored in **`localStorage` under `accessToken`**, and the refresh token under `refreshToken`. The access token is short-lived (15 minutes by default).
 - `apiClient` request interceptor attaches `Authorization: Bearer <token>` to every request.
 - Route protection is handled **client-side** in [`LayoutWrapper`](../components/LayoutWrapper.tsx): `/` and unknown routes redirect to `/home` (via `next.config.ts` and `app/not-found.tsx`), unauthenticated users are redirected to `/login`, and authenticated users on `/login` are redirected to `/home`.
 
-- Auto-logout: in the response interceptor ([`apiClient.ts`](../services/apiClient.ts)), a `401` on a request made with a token removes `accessToken` and reloads `/login?session=expired`, which shows a session-expired toast.
+- Token refresh: in the response interceptor ([`apiClient.ts`](../services/apiClient.ts)), a `401` on a request made with a token trades the refresh token at `POST /auth/refresh` and resends the request. Concurrent requests share one refresh, and a token another tab already refreshed is reused.
+- Auto-logout: if the refresh fails (expired, revoked, or the student is inactive), the interceptor removes both tokens and reloads `/login?session=expired` (or `=inactive`), which shows a toast. Logging out from the account page revokes the session at `POST /auth/logout` (best effort, capped at 5 seconds) and clears both tokens.
 
 ---
 
