@@ -1,7 +1,7 @@
 'use client';
 
 import { Search, ChevronLeft, X } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/ThemeProvider';
@@ -24,8 +24,16 @@ const Header = () => {
     data: searchData,
     isLoading: isSearching,
     debouncedQuery: debouncedSearch,
+    hasNextPage: hasMoreResults,
+    isFetchingNextPage: isFetchingMoreResults,
+    fetchNextPage: fetchMoreResults,
   } = useGlobalSearch(searchQuery);
+  const loadMoreResults = useCallback(() => {
+    fetchMoreResults();
+  }, [fetchMoreResults]);
 
+  // Over the pages loaded so far: the newest ones, or more once the panel
+  // has scrolled further
   const unreadCount = notifications.filter((n) => n.status).length;
   const topics = searchData ?? [];
 
@@ -119,6 +127,9 @@ const Header = () => {
                     isLoading={isSearching}
                     query={searchQuery}
                     debouncedQuery={debouncedSearch}
+                    hasNextPage={hasMoreResults}
+                    isFetchingNextPage={isFetchingMoreResults}
+                    onLoadMore={loadMoreResults}
                     onSelectResult={() => setIsSearchFocused(false)}
                   />
                 </motion.div>
@@ -243,6 +254,9 @@ const Header = () => {
                 isLoading={isSearching}
                 query={searchQuery}
                 debouncedQuery={debouncedSearch}
+                hasNextPage={hasMoreResults}
+                isFetchingNextPage={isFetchingMoreResults}
+                onLoadMore={loadMoreResults}
                 isMobile
                 onSelectResult={() => {
                   setIsSearchFocused(false);

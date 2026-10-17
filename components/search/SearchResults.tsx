@@ -3,7 +3,9 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 
+import { SEARCH_PAGE_SIZE } from '@/hooks/useGlobalSearch';
 import type { GlobalSearchTopic } from '@/types/search.types';
 
 interface SearchResultsProps {
@@ -13,6 +15,9 @@ interface SearchResultsProps {
   debouncedQuery: string;
   isMobile?: boolean;
   onSelectResult: () => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  onLoadMore?: () => void;
 }
 
 const SearchResults = ({
@@ -22,11 +27,34 @@ const SearchResults = ({
   debouncedQuery,
   isMobile = false,
   onSelectResult,
+  hasNextPage = false,
+  isFetchingNextPage = false,
+  onLoadMore,
 }: SearchResultsProps) => {
   const router = useRouter();
   const isDebouncing = query.trim() !== debouncedQuery;
   const isPending = isLoading || isDebouncing;
   const hasQuery = query.trim().length > 0;
+
+  // Loads the next page when the end of the list scrolls into view
+  const listRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node || !hasNextPage || isFetchingNextPage || !onLoadMore) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) onLoadMore();
+      },
+      { root: listRef.current, rootMargin: '200px' }
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [topics.length, hasNextPage, isFetchingNextPage, onLoadMore]);
 
   if (!hasQuery) {
     return (
@@ -85,6 +113,7 @@ const SearchResults = ({
         )} */}
 
         <div
+          ref={listRef}
           className={`flex flex-col custom-scrollbar ${
             isMobile && topics.length === 0 && !isPending
               ? 'flex-1 justify-center pb-20'
@@ -107,7 +136,11 @@ const SearchResults = ({
               }`}
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05, duration: 0.2 }}
+              // each page of results fades in from its own first row
+              transition={{
+                delay: (index % SEARCH_PAGE_SIZE) * 0.05,
+                duration: 0.2,
+              }}
               whileTap={{ scale: 0.98 }}
             >
               <div className="flex-1 min-w-0 pr-4">
@@ -129,6 +162,18 @@ const SearchResults = ({
               </div>
             </motion.div>
           ))}
+
+          {hasNextPage && topics.length > 0 && (
+            <div ref={loadMoreRef} className="flex flex-col gap-2 pt-2">
+              {isFetchingNextPage &&
+                [1, 2].map((item) => (
+                  <div
+                    key={item}
+                    className="h-14 w-full bg-(--color-bg-tertiary) rounded-lg animate-pulse"
+                  />
+                ))}
+            </div>
+          )}
 
           {!isPending && topics.length === 0 && (
             <div
