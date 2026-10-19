@@ -151,11 +151,9 @@ const AdmissionDetails = () => {
 
                   <div className="flex flex-col space-y-4">
                     {admission?.batch?.map((b) => {
-                      const parts = b?.label?.split('-');
-                      const subjectCode =
-                        parts && parts.length > 0
-                          ? parts[parts.length - 1]
-                          : '';
+                      // The paper's code, not the end of the batch name,
+                      // which is often its mode (ON)
+                      const subjectCode = b?.code;
 
                       return (
                         <div

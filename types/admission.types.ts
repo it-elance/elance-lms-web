@@ -7,6 +7,8 @@ export interface Program {
 export interface Batch {
   batch_id: string;
   label: string;
+  // The batch's paper code, e.g. FA. Optional, as older backends don't send it.
+  code?: string;
   start_date: string;
   end_date: string;
 }
