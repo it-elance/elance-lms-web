@@ -67,6 +67,9 @@ export interface Announcement {
   title: string;
   description: string;
   image_url: string;
+  // An optional page opened from the announcement's button; '' when there is
+  // none. Optional, as older backends don't send it.
+  link_url?: string;
   published_at: string;
 }
 
