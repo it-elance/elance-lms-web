@@ -1,3 +1,5 @@
+import type { Pagination } from '@/types/common.types';
+
 export interface GlobalSearchTopic {
   topic_id: string;
   title: string;
@@ -21,4 +23,12 @@ export interface GlobalSearchResponse {
   data: {
     topics: GlobalSearchTopic[];
   };
+  // sent when the request has page or page_size
+  pagination?: Pagination;
+}
+
+// One page of search results
+export interface GlobalSearchPage {
+  topics: GlobalSearchTopic[];
+  pagination: Pagination;
 }

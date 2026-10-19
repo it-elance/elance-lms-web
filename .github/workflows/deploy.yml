@@ -1,0 +1,116 @@
+# Deploys the student web app to the production server on every push to main
+# (merging the development → main PR is a push to main). It can also be run by
+# hand from the Actions tab.
+#
+# Needs, in the repo's "production" environment (Settings → Environments):
+#   secrets SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, SSH_KNOWN_HOSTS
+# and on the server: SSH_USER owns APP_DIR, which holds the production .env,
+# and PM2 runs PM2_APP (`next start -p 3012`) as SSH_USER.
+name: Deploy to production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 20
+    env:
+      APP_DIR: /var/www/html/elance-lms-web
+      PM2_APP: elance-lms-web
+      HEALTH_URL: http://127.0.0.1:3012/login
+    steps:
+      - name: Set up SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Deploy on the server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The script goes over SSH stdin with its values first, so the token
+          # (read-only, expires with this job) never shows in a command line.
+          {
+            printf 'APP_DIR=%q PM2_APP=%q HEALTH_URL=%q REPO=%q SHA=%q GH_TOKEN=%q\n' \
+              "$APP_DIR" "$PM2_APP" "$HEALTH_URL" "$GITHUB_REPOSITORY" "$GITHUB_SHA" "$GH_TOKEN"
+            cat <<'SCRIPT'
+          deploy() {
+            set -euo pipefail
+            if [ ! -w "$APP_DIR" ]; then
+              echo "::error::$APP_DIR is not writable by $(whoami); that user must own it."
+              exit 1
+            fi
+            cd "$APP_DIR"
+
+            echo "==> Deploying ${SHA:0:7} (server was on $(git rev-parse --short HEAD))"
+            local auth
+            auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+            GIT_TERMINAL_PROMPT=0 GIT_CONFIG_COUNT=1 \
+              GIT_CONFIG_KEY_0=http.https://github.com/.extraheader \
+              GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $auth" \
+              git fetch --no-tags "https://github.com/$REPO.git" "+$SHA:refs/remotes/origin/main"
+            git status --short --untracked-files=no
+            git reset --hard "$SHA"
+
+            echo "==> Installing dependencies"
+            yarn install --frozen-lockfile --non-interactive
+
+            # next build empties the live .next first. Keep a copy (without the
+            # build cache) so a failed build can put the running site back.
+            rm -rf .next.prev
+            if [ -d .next ]; then
+              mkdir .next.prev
+              find .next -mindepth 1 -maxdepth 1 ! -name cache -exec cp -a {} .next.prev/ \;
+            fi
+
+            echo "==> Building"
+            if ! yarn build; then
+              if [ -d .next.prev ]; then
+                echo "Build failed; restoring the previous build"
+                mkdir -p .next
+                find .next -mindepth 1 -maxdepth 1 ! -name cache -exec rm -rf {} +
+                cp -a .next.prev/. .next/
+                pm2 restart "$PM2_APP"
+              fi
+              echo "::error::yarn build failed; the site was left on the previous build"
+              exit 1
+            fi
+
+            echo "==> Restarting $PM2_APP"
+            pm2 restart "$PM2_APP"
+
+            for _ in $(seq 30); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' "$HEALTH_URL" || true)
+              if [ "$code" -ge 200 ] && [ "$code" -lt 500 ]; then
+                echo "==> Deployed ${SHA:0:7}"
+                return 0
+              fi
+              sleep 2
+            done
+            echo "::error::$PM2_APP is not answering on $HEALTH_URL; check pm2 logs $PM2_APP"
+            exit 1
+          }
+          deploy < /dev/null
+          SCRIPT
+          } | ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes \
+              -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o ServerAliveInterval=30 \
+              "$SSH_USER@$SSH_HOST" bash -s

@@ -4,8 +4,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { X } from 'lucide-react';
+import { ArrowUpRight, X } from 'lucide-react';
 import type { Announcement } from '@/types/home.types';
+
+// The button's text, the same on every announcement, as in the mobile app
+const LINK_LABEL = 'Learn more';
+
+// Only an http(s) address becomes a button, so nothing else can run from it
+const isWebAddress = (value?: string): value is string => {
+  if (!value) return false;
+  try {
+    const { protocol } = new URL(value);
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
 
 interface AnnouncementModalProps {
   isOpen: boolean;
@@ -58,6 +72,10 @@ const AnnouncementModal = ({
         year: 'numeric',
       })
     : '';
+
+  const linkUrl = isWebAddress(announcement.link_url)
+    ? announcement.link_url
+    : null;
 
   return createPortal(
     <AnimatePresence>
@@ -151,6 +169,26 @@ const AnnouncementModal = ({
                 </div>
               </div>
             </div>
+
+            {/* The link's button stays below the scrolling text, always in
+                view */}
+            {linkUrl && (
+              <div className="shrink-0 px-4 pt-3 pb-4 border-t border-(--color-border-light)">
+                <a
+                  href={linkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 bg-(--color-primary-500) hover:bg-(--color-primary-600) text-white Button-Primary rounded-xl flex items-center justify-center gap-2 transition-colors"
+                >
+                  <span className="truncate">{LINK_LABEL}</span>
+                  <ArrowUpRight
+                    className="w-5 h-5 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">(opens in a new tab)</span>
+                </a>
+              </div>
+            )}
           </motion.div>
         </div>
       )}

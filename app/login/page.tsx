@@ -24,6 +24,9 @@ import Image from 'next/image';
 
 type Step = 'SPLASH' | 'MOBILE' | 'EMAIL' | 'OTP';
 
+// The only country login codes reach by SMS
+const SMS_COUNTRY: CountryCode = 'IN';
+
 // The API client rejects with the backend body ({ message, code }). A network
 // failure rejects with the AxiosError itself, whose message is not for students.
 interface ApiErrorBody {
@@ -57,6 +60,7 @@ const Login = () => {
   // international format the backend stores, e.g. +919876543210
   const fullPhoneNumber =
     parsePhoneNumberFromString(phoneNumber, country)?.number ?? '';
+  const isSmsUnavailable = country !== SMS_COUNTRY;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -153,6 +157,14 @@ const Login = () => {
     } else {
       setStep('MOBILE');
     }
+  };
+
+  // switch to email login, from the mobile number or its OTP
+  const handleUseEmail = () => {
+    setOtp(['', '', '', '']);
+    setPhoneNumber('');
+    setEmail('');
+    setStep('EMAIL');
   };
 
   // handle login
@@ -478,6 +490,10 @@ const Login = () => {
                         />
                       </div>
                     </motion.div>
+
+                    {isSmsUnavailable && (
+                      <SmsUnavailableNotice onUseEmail={handleUseEmail} />
+                    )}
                   </motion.div>
                 )}
 
@@ -585,6 +601,10 @@ const Login = () => {
                         )}
                       </p>
                     </motion.div>
+
+                    {previousStep === 'MOBILE' && isSmsUnavailable && (
+                      <SmsUnavailableNotice onUseEmail={handleUseEmail} />
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -654,6 +674,31 @@ const Login = () => {
 };
 
 export default Login;
+
+// Shown for a number outside SMS_COUNTRY, where the code may never arrive:
+// points the student to email login or support
+const SmsUnavailableNotice = ({ onUseEmail }: { onUseEmail: () => void }) => (
+  <motion.div
+    role="status"
+    initial={{ opacity: 0, y: 5 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.2 }}
+    className="rounded-xl bg-(--color-warning-100) p-3"
+  >
+    <p className="Body-Small text-(--color-text-primary)">
+      We can send the code by SMS only to Indian (+91) numbers. Log in with your
+      email address instead, or contact support.
+    </p>
+
+    <button
+      type="button"
+      onClick={onUseEmail}
+      className="mt-2 Button-Small text-(--color-text-primary) underline underline-offset-2 cursor-pointer"
+    >
+      Use email instead
+    </button>
+  </motion.div>
+);
 
 // svg component for reusable icon
 const SvgIcon = ({

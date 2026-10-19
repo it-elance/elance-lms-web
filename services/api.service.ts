@@ -37,7 +37,6 @@ import type {
   MaterialsByLectureResponse,
 } from '@/types/material.types';
 import type {
-  NotificationItem,
   NotificationResponse,
   ReadNotificationPayload,
 } from '@/types/notification.types';
@@ -49,8 +48,8 @@ import type {
 } from '@/types/favourite.types';
 import type { PaperResponse, ChapterResponse } from '@/types/paper.types';
 import type {
+  GlobalSearchPage,
   GlobalSearchResponse,
-  GlobalSearchTopic,
 } from '@/types/search.types';
 
 // Login API
@@ -207,9 +206,15 @@ export const materialsByLectureApi = async (
 };
 
 // Notification APIs
-export const getNotificationsApi = async (): Promise<NotificationItem[]> => {
-  const response = await apiClient.get<NotificationResponse>('/notification');
-  return response.data.notification;
+// One page of the student's notifications, newest first
+export const getNotificationsApi = async (
+  page: number,
+  pageSize: number
+): Promise<NotificationResponse> => {
+  const response = await apiClient.get<NotificationResponse>('/notification', {
+    params: { page, page_size: pageSize },
+  });
+  return response.data;
 };
 
 export const readNotificationApi = async (body: ReadNotificationPayload) => {
@@ -281,12 +286,24 @@ export const getFavouriteMaterialsApi = async (
   return response.data;
 };
 
-// Global Search API
+// Global Search API: one page of videos matching the query
 export const globalSearchApi = async (
-  query: string
-): Promise<GlobalSearchTopic[]> => {
+  query: string,
+  page: number,
+  pageSize: number
+): Promise<GlobalSearchPage> => {
   const response = await apiClient.get<GlobalSearchResponse>('/home/search', {
-    params: { search: query },
+    params: { search: query, page, page_size: pageSize },
   });
-  return response.data.data.topics;
+  const { topics } = response.data.data;
+  // A backend without paging sends every match and no pagination: one last page
+  const pagination = response.data.pagination ?? {
+    current_page: page,
+    page_size: topics.length,
+    total_items: topics.length,
+    total_pages: 1,
+    has_next: false,
+    has_previous: false,
+  };
+  return { topics, pagination };
 };

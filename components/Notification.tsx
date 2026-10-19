@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Loader2 } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
 import type { NotificationItem } from '@/types/notification.types';
 import Image from 'next/image';
@@ -121,6 +121,9 @@ const Notification = ({ isOpen, onClose }: NotificationProps) => {
   const {
     notifications,
     isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     markAsRead,
     markAllAsRead,
     isMarkingAllAsRead,
@@ -138,6 +141,33 @@ const Notification = ({ isOpen, onClose }: NotificationProps) => {
   }, [notifications, activeFilter]);
 
   const hasNotifications = filteredNotifications.length > 0;
+
+  // Loads the next page when the end of the list scrolls into view. On a tab
+  // the loaded pages have little of, it keeps loading while the end shows.
+  const listRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!isOpen || !node || !hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) fetchNextPage();
+      },
+      { root: listRef.current, rootMargin: '200px' }
+    );
+
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [
+    isOpen,
+    filteredNotifications.length,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  ]);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'auto';
@@ -243,7 +273,10 @@ const Notification = ({ isOpen, onClose }: NotificationProps) => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-4 flex flex-col">
+            <div
+              ref={listRef}
+              className="flex-1 overflow-y-auto px-4 flex flex-col"
+            >
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center flex-1 gap-3">
                   <Loader2 className="w-8 h-8 animate-spin text-(--color-primary-500)" />
@@ -252,7 +285,7 @@ const Notification = ({ isOpen, onClose }: NotificationProps) => {
                     Loading notifications...
                   </p>
                 </div>
-              ) : !hasNotifications ? (
+              ) : !hasNotifications && !hasNextPage ? (
                 <div className="flex flex-col items-center justify-center flex-1 gap-3">
                   <Image
                     src="/empty-notifications.svg"
@@ -274,24 +307,36 @@ const Notification = ({ isOpen, onClose }: NotificationProps) => {
                 </div>
               ) : (
                 <div className="mb-6">
-                  <h3 className="Body-Extra-Small text-(--color-text-tertiary) mb-4">
-                    Recent
-                  </h3>
+                  {hasNotifications && (
+                    <>
+                      <h3 className="Body-Extra-Small text-(--color-text-tertiary) mb-4">
+                        Recent
+                      </h3>
 
-                  <div className="space-y-6">
-                    {filteredNotifications.map((notification, index) => (
-                      <NotificationCard
-                        key={notification?._id}
-                        notification={notification}
-                        isLast={index === filteredNotifications.length - 1}
-                        onRead={(id) =>
-                          markAsRead({
-                            notification_id: id,
-                          })
-                        }
-                      />
-                    ))}
-                  </div>
+                      <div className="space-y-6">
+                        {filteredNotifications.map((notification, index) => (
+                          <NotificationCard
+                            key={notification?._id}
+                            notification={notification}
+                            isLast={index === filteredNotifications.length - 1}
+                            onRead={(id) =>
+                              markAsRead({
+                                notification_id: id,
+                              })
+                            }
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {hasNextPage && (
+                    <div ref={loadMoreRef} className="flex justify-center py-4">
+                      {(isFetchingNextPage || !hasNotifications) && (
+                        <Loader2 className="w-6 h-6 animate-spin text-(--color-primary-500)" />
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
