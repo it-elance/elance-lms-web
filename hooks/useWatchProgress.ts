@@ -4,7 +4,10 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { storeWatchProgressApi } from '@/services/api.service';
 import { ANALYTICS_QUERY_KEY } from '@/hooks/useAnalyticsData';
+import { ALL_COURSE_LECTURES_QUERY_KEY } from '@/hooks/useCourseLectures';
 import { HOME_QUERY_KEY } from '@/hooks/useHomeData';
+import { ALL_MY_LEARNING_QUERY_KEY } from '@/hooks/useMyLearning';
+import { ALL_PAPER_DETAILS_QUERY_KEY } from '@/hooks/usePaperDetails';
 import type { TPStreamsPlayer } from '@/types/player.types';
 
 const POLL_INTERVAL_MS = 1000;
@@ -62,6 +65,18 @@ export const useWatchProgress = ({
         .then(() => {
           queryClient.invalidateQueries({ queryKey: ANALYTICS_QUERY_KEY });
           queryClient.invalidateQueries({ queryKey: HOME_QUERY_KEY });
+          // Completing the video ticks its lecture and can complete a chapter
+          if (reportsCompletion) {
+            queryClient.invalidateQueries({
+              queryKey: ALL_COURSE_LECTURES_QUERY_KEY,
+            });
+            queryClient.invalidateQueries({
+              queryKey: ALL_PAPER_DETAILS_QUERY_KEY,
+            });
+            queryClient.invalidateQueries({
+              queryKey: ALL_MY_LEARNING_QUERY_KEY,
+            });
+          }
         })
         .catch(() => {
           // Retry with the next report

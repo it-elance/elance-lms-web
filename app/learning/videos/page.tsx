@@ -36,13 +36,27 @@ const VideosContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [openChapters, setOpenChapters] = useState<Record<string, boolean>>({});
   const [activeLectureId, setActiveLectureId] = useState<string | null>(null);
+  // The lecture opened by going on from the previous one, which starts by itself
+  const [autoPlayLectureId, setAutoPlayLectureId] = useState<string | null>(
+    null
+  );
+  // The topic_id the lecture was last picked from. A refreshed list (e.g. a new
+  // completion checkmark) keeps the lecture the student has moved on to.
+  const pickedTopicIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (isLoading || !chapters.length) return;
 
-    const selectedLesson = chapters
-      .flatMap((chapter) => chapter.lessons || [])
-      .find((lesson) => lesson.id === topicId || lesson.video_id === topicId);
+    const lessons = chapters.flatMap((chapter) => chapter.lessons || []);
+    const isActiveListed = lessons.some(
+      (lesson) => lesson.id === activeLectureId
+    );
+    if (topicId === pickedTopicIdRef.current && isActiveListed) return;
+    pickedTopicIdRef.current = topicId;
+
+    const selectedLesson = lessons.find(
+      (lesson) => lesson.id === topicId || lesson.video_id === topicId
+    );
 
     const lectureId = selectedLesson?.id || chapters[0]?.lessons?.[0]?.id;
 
@@ -76,6 +90,26 @@ const VideosContent = () => {
   const { toggleFavourite, isTogglingFavourite } = useFavourite();
   const canPlayVideo = Boolean(videoData?.video_id && videoData?.access_token);
   const playerRef = useRef<TPStreamsPlayer | null>(null);
+
+  const selectLecture = (lectureId: string) => {
+    setAutoPlayLectureId(null);
+    setActiveLectureId(lectureId);
+  };
+
+  // Go on to the next lecture with a video, into the next chapter if needed
+  const playNextLecture = () => {
+    const lessons = chapters.flatMap((chapter) => chapter.lessons || []);
+    const index = lessons.findIndex((lesson) => lesson.id === activeLectureId);
+    if (index === -1) return;
+
+    const nextLesson = lessons
+      .slice(index + 1)
+      .find((lesson) => lesson.video_id);
+    if (!nextLesson) return;
+
+    setAutoPlayLectureId(nextLesson.id);
+    setActiveLectureId(nextLesson.id);
+  };
 
   const toggleChapter = (id: string) => {
     setOpenChapters((prev) => ({
@@ -134,6 +168,8 @@ const VideosContent = () => {
                       batchId={videoData?.batch_id}
                       duration={videoData?.duration}
                       resumePosition={videoData?.resume_position}
+                      autoPlay={autoPlayLectureId === videoData?.lecture_id}
+                      onEnded={playNextLecture}
                     />
                   ) : isBatchCompleted ? (
                     <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
@@ -388,7 +424,7 @@ const VideosContent = () => {
                                               : ''
                                           }`}
                                           onClick={() =>
-                                            setActiveLectureId(lesson?.id)
+                                            selectLecture(lesson?.id)
                                           }
                                         >
                                           <div>

@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import { useWatchProgress } from '@/hooks/useWatchProgress';
 import type { TPStreamsPlayer } from '@/types/player.types';
@@ -16,6 +16,11 @@ interface VideoPlayerProps {
   duration?: number;
   // Seconds to continue from, where the student last stopped
   resumePosition?: number;
+  // Start playing once loaded, e.g. the next lecture after one ends. The
+  // browser may still hold it until the student presses play.
+  autoPlay?: boolean;
+  // Called when the video plays to the end
+  onEnded?: () => void;
 }
 
 const tpStreamsOrgId = process.env.NEXT_PUBLIC_TPSTREAMS_ORG_ID;
@@ -48,12 +53,30 @@ const VideoPlayer = ({
   batchId,
   duration,
   resumePosition,
+  autoPlay = false,
+  onEnded,
 }: VideoPlayerProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [player, setPlayer] = useState<TPStreamsPlayer | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  // Read once: a new src reloads the player, and its single-use access token
+  // would then be rejected
+  const [isAutoPlay] = useState(autoPlay);
 
   useWatchProgress({ player, videoId: videoGalleryId, batchId, duration });
+
+  const onVideoEnded = useEffectEvent(() => onEnded?.());
+
+  useEffect(() => {
+    if (!player) return;
+
+    const handleEnded = () => onVideoEnded();
+    player.on('ended', handleEnded);
+
+    return () => {
+      player.off('ended', handleEnded);
+    };
+  }, [player]);
 
   // Continue from the last position once the student presses play. Seeking
   // on load would start the video by itself (setCurrentTime plays a video
@@ -86,7 +109,7 @@ const VideoPlayer = ({
     };
   }, [player, resumePosition]);
 
-  const src = `https://app.tpstreams.com/embed/${tpStreamsOrgId}/${assetId}/?access_token=${accessToken}`;
+  const src = `https://app.tpstreams.com/embed/${tpStreamsOrgId}/${assetId}/?access_token=${accessToken}${isAutoPlay ? '&autoplay=1' : ''}`;
 
   // The SDK only knows the player is ready once it hears the iframe's
   // `loadeddata` event, so attach it as soon as the iframe is mounted.
