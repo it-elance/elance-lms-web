@@ -10,8 +10,11 @@ import { myLearningApi } from '@/services/api.service';
 import type { Subject } from '@/types/learning.types';
 import type { Pagination } from '@/types/common.types';
 
+// Every page of My Learning, e.g. to refresh the completed chapters counts
+export const ALL_MY_LEARNING_QUERY_KEY = ['my-learning'] as const;
+
 export const MY_LEARNING_QUERY_KEY = (page: number) =>
-  ['my-learning', page] as const;
+  [...ALL_MY_LEARNING_QUERY_KEY, page] as const;
 
 export const useMyLearning = () => {
   const queryClient = useQueryClient();
