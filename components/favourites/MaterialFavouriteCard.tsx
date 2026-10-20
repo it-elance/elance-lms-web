@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, MoreVertical } from 'lucide-react';
 import Image from 'next/image';
 import type { FavouriteMaterial } from '@/types/favourite.types';
+import { downloadMaterial, getMaterialPreviewUrl } from '@/utils/materialFile';
 
 const FILE_TYPE_THUMBNAILS = ['pdf', 'ppt', 'xls', 'jpg', 'doc'];
 
@@ -48,14 +49,31 @@ const MaterialFavouriteCard = ({
   onMenuToggle,
   onToggleFavourite,
 }: MaterialFavouriteCardProps) => {
+  const handlePreview = () => {
+    if (material?.file?.preview_url) {
+      window.open(
+        getMaterialPreviewUrl(
+          material.file.preview_url,
+          material.file.extension
+        ),
+        '_blank',
+        'noreferrer'
+      );
+    }
+  };
+
   const handleDownload = () => {
     if (material?.file?.download_url) {
-      window.open(material.file.download_url, '_blank', 'noreferrer');
+      downloadMaterial(
+        material.file.download_url,
+        material.title,
+        material.file.extension
+      );
     }
   };
 
   return (
-    <div onClick={handleDownload} className="block cursor-pointer group">
+    <div onClick={handlePreview} className="block cursor-pointer group">
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}

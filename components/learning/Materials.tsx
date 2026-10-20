@@ -1,12 +1,13 @@
 import Image from 'next/image';
-import { Lock } from 'lucide-react';
-import { useMemo } from 'react';
+import { Loader2, Lock } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useMaterials } from '@/hooks/useMaterials';
 import { useFavourite } from '@/hooks/useFavourite';
 import { useTheme } from '@/components/ThemeProvider';
 import { BATCH_COMPLETED_MESSAGE } from '@/services/apiClient';
 import type { FavouritePayload } from '@/types/favourite.types';
 import type { Material } from '@/types/material.types';
+import { downloadMaterial, getMaterialPreviewUrl } from '@/utils/materialFile';
 
 const FILE_TYPE_THUMBNAILS = ['pdf', 'ppt', 'xls', 'jpg', 'doc'];
 
@@ -206,79 +207,111 @@ const MaterialCard = ({
   lectureId: string | null | undefined;
   isTogglingFavourite: boolean;
   onToggleFavourite: ToggleFavouriteHandler;
-}) => (
-  <a
-    href={material?.file_url}
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label={`Open ${material?.title}`}
-    className="flex items-center justify-between p-2 rounded-xl bg-(--color-bg-secondary) cursor-pointer group hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
-  >
-    <div className="flex items-center gap-3 overflow-hidden">
-      {/* Icon */}
-      <div className="w-22 h-14 flex items-center justify-center shrink-0 rounded-md bg-(--color-bg-tertiary)">
-        <Image
-          src={getMaterialThumbnail(material?.file_type, resolvedTheme)}
-          alt={material?.file_type?.toUpperCase()}
-          width={25}
-          height={25}
-        />
+}) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    await downloadMaterial(
+      material?.file_url,
+      material?.title,
+      material?.file_type
+    );
+    setIsDownloading(false);
+  };
+
+  return (
+    <a
+      href={getMaterialPreviewUrl(material?.file_url, material?.file_type)}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Preview ${material?.title}`}
+      className="flex items-center justify-between p-2 rounded-xl bg-(--color-bg-secondary) cursor-pointer group hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
+    >
+      <div className="flex items-center gap-3 overflow-hidden">
+        {/* Icon */}
+        <div className="w-22 h-14 flex items-center justify-center shrink-0 rounded-md bg-(--color-bg-tertiary)">
+          <Image
+            src={getMaterialThumbnail(material?.file_type, resolvedTheme)}
+            alt={material?.file_type?.toUpperCase()}
+            width={25}
+            height={25}
+          />
+        </div>
+
+        {/* Text */}
+        <div className="flex flex-col min-w-0">
+          {/* title */}
+          <h4 className="Body-Small text-(--color-text-primary) truncate pr-4">
+            {material?.title}
+          </h4>
+
+          <p className="Caption-Small text-(--color-text-tertiary) flex items-center gap-2 mt-1.5">
+            {/* file type */}
+            <span>{material?.file_type?.toUpperCase()}</span>
+
+            <span className="w-1 h-1 rounded-full bg-(--color-text-tertiary)" />
+
+            {/* file size */}
+            <span>{material?.file_size}</span>
+          </p>
+        </div>
       </div>
 
-      {/* Text */}
-      <div className="flex flex-col min-w-0">
-        {/* title */}
-        <h4 className="Body-Small text-(--color-text-primary) truncate pr-4">
-          {material?.title}
-        </h4>
+      {/* Download and favourite */}
+      <div className="flex items-center gap-3 shrink-0">
+        <button
+          type="button"
+          aria-label={`Download ${material?.title}`}
+          disabled={isDownloading}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            handleDownload();
+          }}
+          className="cursor-pointer text-(--color-text-tertiary) hover:text-(--color-text-primary) transition-colors disabled:cursor-wait"
+        >
+          {isDownloading ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <SvgIcon src="/download.svg" className="w-5 h-5 bg-current" />
+          )}
+        </button>
 
-        <p className="Caption-Small text-(--color-text-tertiary) flex items-center gap-2 mt-1.5">
-          {/* file type */}
-          <span>{material?.file_type?.toUpperCase()}</span>
+        <button
+          type="button"
+          aria-label={
+            material?.is_favourite
+              ? 'Remove from favourites'
+              : 'Add to favourites'
+          }
+          disabled={isTogglingFavourite}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
 
-          <span className="w-1 h-1 rounded-full bg-(--color-text-tertiary)" />
-
-          {/* file size */}
-          <span>{material?.file_size}</span>
-        </p>
+            onToggleFavourite({
+              entity_type: 'material',
+              entity_id: material?.material_id,
+              is_favourite: !material?.is_favourite,
+              lectureId,
+            });
+          }}
+          className={`cursor-pointer transition-colors ${
+            material?.is_favourite
+              ? 'text-(--color-primary-500)'
+              : 'text-(--color-text-tertiary)'
+          } disabled:opacity-50 disabled:cursor-not-allowed`}
+        >
+          <SvgIcon
+            src={material?.is_favourite ? '/heart-filled.svg' : '/heart.svg'}
+            className="w-5 h-5 bg-current"
+          />
+        </button>
       </div>
-    </div>
-
-    {/* Favourite */}
-    <div className="flex items-center gap-3 shrink-0">
-      <button
-        type="button"
-        aria-label={
-          material?.is_favourite
-            ? 'Remove from favourites'
-            : 'Add to favourites'
-        }
-        disabled={isTogglingFavourite}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-
-          onToggleFavourite({
-            entity_type: 'material',
-            entity_id: material?.material_id,
-            is_favourite: !material?.is_favourite,
-            lectureId,
-          });
-        }}
-        className={`cursor-pointer transition-colors ${
-          material?.is_favourite
-            ? 'text-(--color-primary-500)'
-            : 'text-(--color-text-tertiary)'
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
-      >
-        <SvgIcon
-          src={material?.is_favourite ? '/heart-filled.svg' : '/heart.svg'}
-          className="w-5 h-5 bg-current"
-        />
-      </button>
-    </div>
-  </a>
-);
+    </a>
+  );
+};
 
 const SkeletonCard = () => (
   <div className="flex items-center justify-between p-2 rounded-xl bg-(--color-bg-secondary) animate-pulse">
