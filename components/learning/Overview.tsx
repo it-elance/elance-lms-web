@@ -111,12 +111,12 @@ const Overview = () => {
           </div>
         </div>
 
-        {/* {paperDetails?.instructors && paperDetails?.instructors.length > 0 && ( */}
-        {/* <> */}
-        {/* <div className="h-px bg-(--color-border-light) w-full"></div> */}
+        {paperDetails?.instructors && paperDetails?.instructors.length > 0 && (
+          <>
+            <div className="h-px bg-(--color-border-light) w-full"></div>
 
-        {/* Instructors */}
-        {/* <div className="flex flex-col gap-2">
+            {/* Instructors */}
+            <div className="flex flex-col gap-2">
               <h3 className="Overline text-(--color-text-tertiary)">
                 Instructors
               </h3>
@@ -131,9 +131,9 @@ const Overview = () => {
                   </li>
                 ))}
               </ul>
-            </div> */}
-        {/* </> */}
-        {/* )} */}
+            </div>
+          </>
+        )}
 
         {/* <div className="h-px bg-(--color-border-light) w-full"></div> */}
 
