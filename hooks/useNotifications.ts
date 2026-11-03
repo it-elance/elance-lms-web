@@ -20,6 +20,11 @@ export const NOTIFICATIONS_PAGE_SIZE = 20;
 
 const QUERY_KEY = ['notifications'];
 
+// How often an open tab checks for new notifications, so the bell's unread
+// dot shows them without a reload. A hidden tab doesn't check; it does on
+// coming back, if its list is older than this.
+const REFRESH_EVERY_MS = 1000 * 30;
+
 // The student's notifications a page at a time, newest first; fetchNextPage
 // loads the next one onto the end
 export const useNotifications = () => {
@@ -42,7 +47,8 @@ export const useNotifications = () => {
       lastPage.pagination.has_next
         ? lastPage.pagination.current_page + 1
         : undefined,
-    staleTime: 1000 * 60 * 2,
+    staleTime: REFRESH_EVERY_MS,
+    refetchInterval: REFRESH_EVERY_MS,
   });
 
   // Pages are offsets, so a notification that arrives between two fetches

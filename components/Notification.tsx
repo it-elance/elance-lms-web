@@ -32,6 +32,32 @@ const FILTERS = [
 const getNotificationIcon = (type: string) =>
   NOTIFICATION_ICONS[type.toLowerCase()] || '/mail-noti.svg';
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+const startOfDay = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+
+// When a notification came: Today or Yesterday, else its date (with the year
+// when it isn't this year), then the time, e.g. "Yesterday, 10:47"
+const formatReceivedAt = (value: string) => {
+  const date = new Date(value);
+  const now = new Date();
+  const time = date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  const daysAgo = Math.round((startOfDay(now) - startOfDay(date)) / DAY_MS);
+  if (daysAgo === 0) return `Today, ${time}`;
+  if (daysAgo === 1) return `Yesterday, ${time}`;
+
+  const options: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'short',
+  };
+  if (date.getFullYear() !== now.getFullYear()) options.year = 'numeric';
+  return `${date.toLocaleDateString('en-GB', options)}, ${time}`;
+};
+
 const SvgIcon = ({
   src,
   className = '',
@@ -99,10 +125,7 @@ const NotificationCard = ({
 
         {notification?.createdAt && (
           <p className="Caption-Small text-(--color-text-tertiary)">
-            {new Date(notification?.createdAt).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            {formatReceivedAt(notification.createdAt)}
           </p>
         )}
       </div>

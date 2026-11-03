@@ -18,7 +18,7 @@ const Header = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const { resolvedTheme } = useTheme();
-  const { notifications } = useNotifications();
+  const { notifications, refetch: refetchNotifications } = useNotifications();
 
   const {
     data: searchData,
@@ -165,7 +165,11 @@ const Header = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            onClick={() => setIsNotificationOpen(true)}
+            onClick={() => {
+              setIsNotificationOpen(true);
+              // Opens on the latest, not the last check's list
+              refetchNotifications();
+            }}
           >
             <Image
               src={
