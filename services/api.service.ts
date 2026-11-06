@@ -1,8 +1,11 @@
 import apiClient from './apiClient';
 import type { Pagination } from '@/types/common.types';
 import type {
+  ContactChannel,
+  ContactVerification,
+  LoginResponse,
   SendOtpPayload,
-  SessionTokens,
+  VerifyContactPayload,
   VerifyOtpPayload,
 } from '@/types/auth.types';
 import type { HomeApiResponse, HomeData } from '@/types/home.types';
@@ -59,15 +62,38 @@ export const loginApi = async (body: SendOtpPayload) => {
 };
 
 // Verify OTP API: a short-lived access token and a refresh token to renew it
-// (see apiClient.ts)
+// (see apiClient.ts), and whether a contact is still to verify
 export const verifyOtpApi = async (
   body: VerifyOtpPayload
-): Promise<SessionTokens> => {
-  const response = await apiClient.post<SessionTokens>(
+): Promise<LoginResponse> => {
+  const response = await apiClient.post<LoginResponse>(
     '/login/verify/otp',
     body
   );
   return response.data;
+};
+
+// Contact verification at signup: the contact the student didn't log in with
+export const getVerificationApi = async (): Promise<ContactVerification> => {
+  const response = await apiClient.get<{ verification: ContactVerification }>(
+    '/verification'
+  );
+  return response.data.verification;
+};
+
+export const sendVerificationCodeApi = async (
+  type: ContactChannel
+): Promise<void> => {
+  await apiClient.post('/verification/send', { type });
+};
+
+export const verifyVerificationCodeApi = async (
+  body: VerifyContactPayload
+): Promise<ContactVerification> => {
+  const response = await apiClient.post<{
+    verification: ContactVerification;
+  }>('/verification/verify', body);
+  return response.data.verification;
 };
 
 // Ends the session on the server, so its refresh token can't be used again.

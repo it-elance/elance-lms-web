@@ -5,6 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   isValidPhoneNumber,
   parsePhoneNumberFromString,
@@ -16,6 +17,7 @@ import {
   STUDENT_INACTIVE_MESSAGE,
 } from '@/services/apiClient';
 import CountryCodeSelect from '@/components/CountryCodeSelect';
+import { CONTACT_VERIFICATION_QUERY_KEY } from '@/hooks/useContactVerification';
 import type { Variants } from 'framer-motion';
 import type { CountryCode } from 'libphonenumber-js';
 import type { SendOtpPayload, VerifyOtpPayload } from '@/types/auth.types';
@@ -56,6 +58,7 @@ const Login = () => {
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // international format the backend stores, e.g. +919876543210
   const fullPhoneNumber =
@@ -241,6 +244,17 @@ const Login = () => {
       const res = await verifyOtpApi(payload);
       localStorage.setItem('accessToken', res.token);
       localStorage.setItem('refreshToken', res.refreshToken);
+
+      // Whether a new student must verify their other contact: known now, so
+      // the app opens on that step instead of asking again. Never a previous
+      // student's, from before a logout in this tab.
+      queryClient.removeQueries({ queryKey: CONTACT_VERIFICATION_QUERY_KEY });
+      if (res.verification) {
+        queryClient.setQueryData(
+          CONTACT_VERIFICATION_QUERY_KEY,
+          res.verification
+        );
+      }
 
       toast.success('Login successful');
 

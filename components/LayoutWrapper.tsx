@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import ContactVerificationModal from './modals/ContactVerificationModal';
 
 const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
@@ -86,6 +87,9 @@ const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
       >
         {children}
       </motion.main>
+
+      {/* A new student verifies their other contact before using the app */}
+      <ContactVerificationModal />
     </div>
   );
 };
