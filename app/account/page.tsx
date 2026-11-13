@@ -9,6 +9,7 @@ import LogoutModal from '../../components/modals/LogoutModal';
 import { useHomeData } from '@/hooks/useHomeData';
 import { logoutApi } from '@/services/api.service';
 import { User } from 'lucide-react';
+import { SUPPORT_EMAIL } from '@/constants/config';
 
 const menuItems = [
   {
@@ -36,7 +37,11 @@ const menuItems = [
     label: 'Personal Information',
     href: '/account/personal-info',
   },
-  { icon: '/headset-mic.svg', label: 'Support', href: '#' },
+  {
+    icon: '/headset-mic.svg',
+    label: 'Support',
+    href: `mailto:${SUPPORT_EMAIL}`,
+  },
   { icon: '/power.svg', label: 'Logout', action: 'logout' },
 ];
 
@@ -52,7 +57,10 @@ const Account = () => {
   const handleItemClick = (item: (typeof menuItems)[0]) => {
     if (item.action === 'logout') {
       setIsLogoutOpen(true);
-    } else if (item.href && item.href !== '#') {
+    } else if (item.href?.startsWith('mailto:')) {
+      // Opens the student's mail app; the router only handles the app's own pages
+      window.location.assign(item.href);
+    } else if (item.href) {
       router.push(item.href);
     }
   };
