@@ -5,11 +5,12 @@ export interface NotificationItem {
   student: string;
   title: string;
   content: string;
-  // the batch, chapter or announcement it is about (see event)
+  // the batch, chapter, announcement or student it is about (see event)
   relatedId: string;
   // the tab: academics or general
   type: string;
-  // batch_assigned, new_lectures, new_materials, announcement or batch_ending
+  // batch_assigned, new_lectures, new_materials, announcement, batch_ending or
+  // student_status
   event?: string;
   // true while unread
   status: boolean;
