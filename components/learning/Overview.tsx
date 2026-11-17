@@ -6,7 +6,8 @@ import { usePaperDetails } from '../../hooks/usePaperDetails';
 const Overview = () => {
   const searchParams = useSearchParams();
   const paperId = searchParams.get('paper_id');
-  const { paperDetails, isLoading } = usePaperDetails(paperId || '');
+  const batchId = searchParams.get('batch_id');
+  const { paperDetails, isLoading } = usePaperDetails(paperId || '', batchId);
 
   if (isLoading) {
     return (

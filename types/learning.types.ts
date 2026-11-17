@@ -9,6 +9,9 @@ export interface Subject {
   progress_percentage: number;
   icon_url: string;
   batch_status: BatchStatus;
+  // A student may be in two batches of one paper, so each card is one batch
+  batch_id?: string | null;
+  batch_name?: string;
 }
 
 export interface MyLearningResponse {

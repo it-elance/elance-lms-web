@@ -21,16 +21,17 @@ import Notes from '../../../components/learning/Notes';
 import VideoPlayer, {
   getPlayerCurrentTime,
 } from '../../../components/VideoPlayer';
-import { BATCH_COMPLETED_MESSAGE } from '@/services/apiClient';
 import type { TPStreamsPlayer } from '@/types/player.types';
 
 const VideosContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const paperId = searchParams.get('paper_id');
+  // Opened from a course card: that batch's content only (a student may be in two batches of a paper)
+  const batchId = searchParams.get('batch_id');
   const topicId = searchParams.get('topic_id');
 
-  const { chapters, isLoading } = useCourseLectures(paperId || '');
+  const { chapters, isLoading } = useCourseLectures(paperId || '', batchId);
 
   const [activeTab, setActiveTab] = useState('Lectures');
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,7 +86,7 @@ const VideosContent = () => {
   const {
     videoData,
     isLoading: isVideoLoading,
-    isBatchCompleted,
+    batchLock,
   } = useLectureVideo(activeLectureId);
   const { toggleFavourite, isTogglingFavourite } = useFavourite();
   const canPlayVideo = Boolean(videoData?.video_id && videoData?.access_token);
@@ -171,14 +172,16 @@ const VideosContent = () => {
                       autoPlay={autoPlayLectureId === videoData?.lecture_id}
                       onEnded={playNextLecture}
                     />
-                  ) : isBatchCompleted ? (
+                  ) : batchLock ? (
                     <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
                       <Lock className="w-7 h-7 text-white/70" />
 
-                      <p className="Body-Medium text-white">Batch Completed</p>
+                      <p className="Body-Medium text-white">
+                        {batchLock.title}
+                      </p>
 
                       <p className="Body-Extra-Small text-white/70 max-w-xs">
-                        {BATCH_COMPLETED_MESSAGE}
+                        {batchLock.message}
                       </p>
                     </div>
                   ) : null}

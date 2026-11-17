@@ -48,6 +48,8 @@ export interface ContinueWatching {
   is_completed?: boolean;
   // Seconds into the video where the student stopped
   watched_seconds: number;
+  // The lecture's batch, to open the paper at that batch's content
+  batch_id?: string | null;
 }
 
 export interface MyLearningItem {
@@ -59,6 +61,9 @@ export interface MyLearningItem {
   progress_percentage: number;
   image_url: string;
   batch_status: BatchStatus;
+  // A student may be in two batches of one paper, so each card is one batch
+  batch_id?: string | null;
+  batch_name?: string;
 }
 
 export interface Announcement {

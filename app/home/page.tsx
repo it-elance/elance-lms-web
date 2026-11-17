@@ -3,7 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play, ArrowRight, Clock, CircleCheck, RotateCcw } from 'lucide-react';
-import BatchCompletedBadge from '@/components/learning/BatchCompletedBadge';
+import BatchStatusBadge from '@/components/learning/BatchStatusBadge';
+import { paperUrl } from '@/utils/paperUrl';
 import { motion } from 'framer-motion';
 import { useHomeData } from '@/hooks/useHomeData';
 import { useState } from 'react';
@@ -59,7 +60,11 @@ const Home = () => {
               </h1>
 
               <Link
-                href={`/learning/videos?paper_id=${continueWatching?.paper_id || ''}${continueWatching?.topic_id ? `&topic_id=${continueWatching.topic_id}` : ''}`}
+                href={paperUrl(
+                  continueWatching?.paper_id,
+                  continueWatching?.batch_id,
+                  continueWatching?.topic_id
+                )}
                 className="bg-(--color-bg-primary) rounded-xl border-[1.5px] border-(--color-border) p-3 block"
               >
                 {isLoading ? (
@@ -168,9 +173,22 @@ const Home = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <h1 className="text-(--color-text-tertiary) Body-Extra-Small">
-                My Learning
-              </h1>
+              {/* The link to every course sits by the heading, so it shows without scrolling the cards */}
+              <div className="flex items-center justify-between gap-2">
+                <h1 className="text-(--color-text-tertiary) Body-Extra-Small">
+                  My Learning
+                </h1>
+
+                <Link
+                  href="/learning"
+                  className="flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                >
+                  <span className="text-(--color-primary-500) Button-Small">
+                    More Courses
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-(--color-primary-500)" />
+                </Link>
+              </div>
 
               <div className="flex items-stretch overflow-x-auto pb-2 lg:pb-0 gap-3 scrollbar-hide">
                 {isLoading ? (
@@ -182,8 +200,8 @@ const Home = () => {
                 ) : (
                   myLearning.map((course, index) => (
                     <MotionLink
-                      key={course?.subject_id}
-                      href={`/learning/videos?paper_id=${course?.subject_id}`}
+                      key={`${course?.subject_id}-${course?.batch_id ?? ''}`}
+                      href={paperUrl(course?.subject_id, course?.batch_id)}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{
@@ -194,9 +212,7 @@ const Home = () => {
                       className="min-w-[90%] sm:min-w-95 lg:min-w-[calc(33.333%-8px)] lg:w-[calc(33.333%-8px)] shrink-0 bg-(--color-bg-primary) border-[1.5px] border-(--color-border) rounded-xl p-2 relative cursor-pointer"
                     >
                       <div className="relative h-32 w-full rounded-md mb-2 overflow-hidden flex items-center justify-center">
-                        {course?.batch_status === 'completed' && (
-                          <BatchCompletedBadge />
-                        )}
+                        <BatchStatusBadge status={course?.batch_status} />
                         {course?.image_url ? (
                           <Image
                             src={course?.image_url}
@@ -217,6 +233,16 @@ const Home = () => {
                           <h1 className="text-(--color-text-primary) Body-Small line-clamp-1">
                             {course?.title}
                           </h1>
+
+                          {/* Batch: a student may be in two batches of one paper */}
+                          {course?.batch_name && (
+                            <p
+                              className="Body-Extra-Small text-(--color-text-tertiary) line-clamp-1"
+                              title={course.batch_name}
+                            >
+                              {course.batch_name}
+                            </p>
+                          )}
 
                           <div className="mt-3 flex flex-col items-start gap-1">
                             <span className="bg-(--color-bg-secondary) text-(--color-text-secondary) Overline border border-(--color-border) px-2 rounded pt-1">
@@ -271,30 +297,6 @@ const Home = () => {
                     </MotionLink>
                   ))
                 )}
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.5,
-                    ease: 'easeOut',
-                    delay: myLearning.length * 0.1,
-                  }}
-                  className="min-w-35 shrink-0 flex items-center justify-center ml-auto"
-                >
-                  <Link
-                    href="/learning"
-                    className="flex items-center gap-1 cursor-pointer whitespace-nowrap px-4"
-                  >
-                    <span className="text-(--color-primary-500) Button-Small">
-                      More Courses
-                    </span>
-
-                    <div className="text-(--color-primary-500) transition-colors">
-                      <ArrowRight className="w-5 h-5" />
-                    </div>
-                  </Link>
-                </motion.div>
               </div>
             </motion.div>
           )}

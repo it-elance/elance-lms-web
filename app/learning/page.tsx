@@ -5,7 +5,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMyLearning } from '@/hooks/useMyLearning';
 import Image from 'next/image';
 import Link from 'next/link';
-import BatchCompletedBadge from '@/components/learning/BatchCompletedBadge';
+import BatchStatusBadge from '@/components/learning/BatchStatusBadge';
+import { paperUrl } from '@/utils/paperUrl';
 
 const MotionLink = motion.create(Link);
 
@@ -46,8 +47,8 @@ const Learning = () => {
 
               return (
                 <MotionLink
-                  key={subject?.id}
-                  href={`/learning/videos?paper_id=${subject?.id}`}
+                  key={`${subject?.id}-${subject?.batch_id ?? ''}`}
+                  href={paperUrl(subject?.id, subject?.batch_id)}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05, duration: 0.4 }}
@@ -55,9 +56,7 @@ const Learning = () => {
                 >
                   {/* Thumbnail */}
                   <div className="relative h-32 w-full rounded overflow-hidden bg-(--color-bg-tertiary)">
-                    {subject?.batch_status === 'completed' && (
-                      <BatchCompletedBadge />
-                    )}
+                    <BatchStatusBadge status={subject?.batch_status} />
                     {subject?.icon_url ? (
                       <Image
                         src={subject?.icon_url}
@@ -82,6 +81,16 @@ const Learning = () => {
                     <h3 className="Body-Small text-(--color-text-primary) mb-2 truncate">
                       {subject?.title}
                     </h3>
+
+                    {/* Batch: a student may be in two batches of one paper */}
+                    {subject?.batch_name && (
+                      <p
+                        className="-mt-1.5 mb-2 pr-16 Body-Extra-Small text-(--color-text-tertiary) truncate"
+                        title={subject.batch_name}
+                      >
+                        {subject.batch_name}
+                      </p>
+                    )}
 
                     {/* Code & Chapters */}
                     <div className="flex items-end justify-between pt-3">

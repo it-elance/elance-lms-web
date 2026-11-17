@@ -143,13 +143,14 @@ export const admissionDetailsApi = async (): Promise<AdmissionDetailsData> => {
   return response.data.data;
 };
 
-// Course Lecture By Paper API
+// Course Lecture By Paper API: all the student's batches of the paper, or the one in batchId
 export const courseLecturesApi = async (
-  paperId: string
+  paperId: string,
+  batchId?: string | null
 ): Promise<LectureChapter[]> => {
   const response = await apiClient.get<LectureByPaperResponse>(
     `/course/lecture-by-paper`,
-    { params: { paper_id: paperId } }
+    { params: { paper_id: paperId, ...(batchId && { batch_id: batchId }) } }
   );
   return response.data.data;
 };
@@ -173,14 +174,15 @@ export const storeWatchProgressApi = async (body: WatchProgressPayload) => {
   return response.data;
 };
 
-// Paper Details API
+// Paper Details API: all the student's batches of the paper, or the one in batchId
 export const paperDetailsApi = async (
-  paperId: string
+  paperId: string,
+  batchId?: string | null
 ): Promise<PaperDetailsData> => {
   const response = await apiClient.get<PaperDetailsResponse>(
     `/course/paper-details`,
     {
-      params: { paper_id: paperId },
+      params: { paper_id: paperId, ...(batchId && { batch_id: batchId }) },
     }
   );
   return response.data.data.data;

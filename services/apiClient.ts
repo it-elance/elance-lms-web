@@ -12,14 +12,33 @@ export const STUDENT_INACTIVE_MESSAGE =
 export const BATCH_COMPLETED_CODE = 'BATCH_COMPLETED';
 export const BATCH_COMPLETED_MESSAGE =
   'This batch is completed. Its videos and materials are no longer available.';
+// Sent with the 403 for a batch an admin made the student inactive in
+export const BATCH_INACTIVE_CODE = 'BATCH_INACTIVE';
+export const BATCH_INACTIVE_MESSAGE =
+  'Your access to this batch is inactive. Please contact support.';
 let isLoggingOut = false;
 
 type ErrorBody = { code?: string; message?: string };
 type RetryableRequest = InternalAxiosRequestConfig & { _retried?: boolean };
 
-// The response interceptor rejects with the backend body, { message, code }
-export const isBatchCompletedError = (error: unknown): boolean =>
-  (error as { code?: string } | null)?.code === BATCH_COMPLETED_CODE;
+// Why a batch's videos and materials are locked: { title, message }
+export type BatchLock = { title: string; message: string };
+
+const BATCH_LOCKS: Record<string, BatchLock> = {
+  [BATCH_COMPLETED_CODE]: {
+    title: 'Batch Completed',
+    message: BATCH_COMPLETED_MESSAGE,
+  },
+  [BATCH_INACTIVE_CODE]: {
+    title: 'Batch Inactive',
+    message: BATCH_INACTIVE_MESSAGE,
+  },
+};
+
+// The lock a request was refused for (completed batch, or the student made inactive in it), or
+// null. The response interceptor rejects with the backend body, { message, code }.
+export const batchLockOf = (error: unknown): BatchLock | null =>
+  BATCH_LOCKS[(error as { code?: string } | null)?.code ?? ''] ?? null;
 
 // Login and session endpoints answer 401 for a bad OTP or token, not for an expired session
 const isAuthPath = (url?: string) => /^\/?(login|auth)\//.test(url ?? '');
