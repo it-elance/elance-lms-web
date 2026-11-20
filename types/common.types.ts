@@ -1,7 +1,7 @@
 // A completed batch stays listed, but its videos and materials are locked
-// A batch as this student sees it: completed and inactive (an admin made the student inactive in
-// it) are locked
-export type BatchStatus = 'active' | 'completed' | 'inactive';
+// A batch as this student sees it: completed, not started (its start date is still to come) and
+// inactive (an admin made the student inactive in it) are locked
+export type BatchStatus = 'active' | 'completed' | 'not_started' | 'inactive';
 
 export interface Pagination {
   current_page: number;

@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import BatchStatusBadge from '@/components/learning/BatchStatusBadge';
 import { paperUrl } from '@/utils/paperUrl';
+import { batchDateRange } from '@/utils/batchDates';
 
 const MotionLink = motion.create(Link);
 
@@ -82,14 +83,25 @@ const Learning = () => {
                       {subject?.title}
                     </h3>
 
-                    {/* Batch: a student may be in two batches of one paper */}
-                    {subject?.batch_name && (
-                      <p
-                        className="-mt-1.5 mb-2 pr-16 Body-Extra-Small text-(--color-text-tertiary) truncate"
-                        title={subject.batch_name}
-                      >
-                        {subject.batch_name}
-                      </p>
+                    {/* Batch and its dates: a student may be in two batches of one paper */}
+                    {(subject?.batch_name ||
+                      batchDateRange(
+                        subject?.batch_start_date,
+                        subject?.batch_end_date
+                      )) && (
+                      <div className="-mt-1.5 mb-2 pr-16 Body-Extra-Small text-(--color-text-tertiary)">
+                        {subject?.batch_name && (
+                          <p className="truncate" title={subject.batch_name}>
+                            {subject.batch_name}
+                          </p>
+                        )}
+                        <p className="truncate">
+                          {batchDateRange(
+                            subject?.batch_start_date,
+                            subject?.batch_end_date
+                          )}
+                        </p>
+                      </div>
                     )}
 
                     {/* Code & Chapters */}

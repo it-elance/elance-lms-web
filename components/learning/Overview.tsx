@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { usePaperDetails } from '../../hooks/usePaperDetails';
+import { batchDateRange } from '@/utils/batchDates';
 
 const Overview = () => {
   const searchParams = useSearchParams();
@@ -74,6 +75,43 @@ const Overview = () => {
         </div>
 
         <div className="h-px bg-(--color-border-light) w-full"></div>
+
+        {/* Batch: the one opened, or each of the student's batches of the paper */}
+        {paperDetails?.batches && paperDetails.batches.length > 0 && (
+          <>
+            <div className="flex flex-col gap-2">
+              <h3 className="Overline text-(--color-text-tertiary)">
+                {paperDetails.batches.length > 1 ? 'Batches' : 'Batch'}
+              </h3>
+
+              {paperDetails.batches.map((batch) => (
+                <div key={batch.batch_id} className="flex flex-col gap-2">
+                  <div className="flex flex-row items-center gap-1">
+                    <span className="text-(--color-text-secondary) Overline">
+                      Batch :
+                    </span>
+
+                    <span className="text-(--color-text-secondary) Body-Extra-Small">
+                      {batch.batch_name}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-row items-center gap-1">
+                    <span className="text-(--color-text-secondary) Overline">
+                      Dates :
+                    </span>
+
+                    <span className="text-(--color-text-secondary) Body-Extra-Small">
+                      {batchDateRange(batch.start_date, batch.end_date)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="h-px bg-(--color-border-light) w-full"></div>
+          </>
+        )}
 
         {/* Statistics */}
         <div className="flex flex-col gap-2">

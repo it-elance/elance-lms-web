@@ -14,6 +14,8 @@ export const BATCH_COMPLETED_MESSAGE =
   'This batch is completed. Its videos and materials are no longer available.';
 // Sent with the 403 for a batch an admin made the student inactive in
 export const BATCH_INACTIVE_CODE = 'BATCH_INACTIVE';
+// Sent with the 403 for a batch whose start date is still to come; the message names the date
+export const BATCH_NOT_STARTED_CODE = 'BATCH_NOT_STARTED';
 export const BATCH_INACTIVE_MESSAGE =
   'Your access to this batch is inactive. Please contact support.';
 let isLoggingOut = false;
@@ -33,12 +35,22 @@ const BATCH_LOCKS: Record<string, BatchLock> = {
     title: 'Batch Inactive',
     message: BATCH_INACTIVE_MESSAGE,
   },
+  [BATCH_NOT_STARTED_CODE]: {
+    title: 'Batch Not Started',
+    message:
+      "This batch hasn't started yet. Its videos and materials open on its start date.",
+  },
 };
 
 // The lock a request was refused for (completed batch, or the student made inactive in it), or
 // null. The response interceptor rejects with the backend body, { message, code }.
-export const batchLockOf = (error: unknown): BatchLock | null =>
-  BATCH_LOCKS[(error as { code?: string } | null)?.code ?? ''] ?? null;
+export const batchLockOf = (error: unknown): BatchLock | null => {
+  const body = error as ErrorBody | null;
+  const lock = BATCH_LOCKS[body?.code ?? ''];
+  if (!lock) return null;
+  // The backend's message is the more precise one, e.g. the date a batch starts
+  return body?.message ? { ...lock, message: body.message } : lock;
+};
 
 // Login and session endpoints answer 401 for a bad OTP or token, not for an expired session
 const isAuthPath = (url?: string) => /^\/?(login|auth)\//.test(url ?? '');

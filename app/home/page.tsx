@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Play, ArrowRight, Clock, CircleCheck, RotateCcw } from 'lucide-react';
 import BatchStatusBadge from '@/components/learning/BatchStatusBadge';
 import { paperUrl } from '@/utils/paperUrl';
+import { batchDateRange } from '@/utils/batchDates';
 import { motion } from 'framer-motion';
 import { useHomeData } from '@/hooks/useHomeData';
 import { useState } from 'react';
@@ -241,6 +242,18 @@ const Home = () => {
                               title={course.batch_name}
                             >
                               {course.batch_name}
+                            </p>
+                          )}
+
+                          {batchDateRange(
+                            course?.batch_start_date,
+                            course?.batch_end_date
+                          ) && (
+                            <p className="Body-Extra-Small text-(--color-text-tertiary) line-clamp-1">
+                              {batchDateRange(
+                                course?.batch_start_date,
+                                course?.batch_end_date
+                              )}
                             </p>
                           )}
 

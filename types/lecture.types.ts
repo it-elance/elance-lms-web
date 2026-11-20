@@ -46,6 +46,14 @@ export interface LectureVideoResponse {
   };
 }
 
+export interface PaperBatch {
+  batch_id: string;
+  batch_name: string;
+  start_date: string;
+  // The day the student's access runs through (the batch's end date, or their extension)
+  end_date: string;
+}
+
 export interface PaperDetailsData {
   paper_info: {
     paper_title: string;
@@ -54,6 +62,8 @@ export interface PaperDetailsData {
     total_chapters: number;
     last_updated: string;
   };
+  // The batches these details cover (one when opened from a course card)
+  batches?: PaperBatch[];
   statistics: {
     total_paper_duration: string;
     student_completion_rate: number;

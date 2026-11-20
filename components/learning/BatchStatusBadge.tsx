@@ -1,4 +1,4 @@
-import { CircleCheck, Lock } from 'lucide-react';
+import { CircleCheck, Clock, Lock } from 'lucide-react';
 import type { BatchStatus } from '@/types/common.types';
 
 const BADGES = {
@@ -8,6 +8,12 @@ const BADGES = {
     className:
       'border-(--color-success-600) bg-(--color-success-100) text-(--color-success-600)',
   },
+  not_started: {
+    icon: Clock,
+    label: 'Not started',
+    className:
+      'border-(--color-info-600) bg-(--color-info-100) text-(--color-info-600)',
+  },
   inactive: {
     icon: Lock,
     label: 'Batch inactive',
@@ -16,10 +22,15 @@ const BADGES = {
   },
 };
 
-// Marks a paper whose batch is locked for the student: completed, or an admin made them inactive
-// in it. Its videos and materials are locked. Nothing for an active batch.
+// Marks a paper whose batch is locked for the student: completed, not started yet, or an admin made
+// them inactive in it. Its videos and materials are locked. Nothing for an active batch.
 const BatchStatusBadge = ({ status }: { status?: BatchStatus }) => {
-  if (status !== 'completed' && status !== 'inactive') return null;
+  if (
+    status !== 'completed' &&
+    status !== 'not_started' &&
+    status !== 'inactive'
+  )
+    return null;
   const { icon: Icon, label, className } = BADGES[status];
 
   return (
